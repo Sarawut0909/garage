@@ -555,4 +555,82 @@ document.querySelectorAll('.card:not(.kr-custom-cards .card)').forEach(card=>{
 })();
 </script>
 
+
+<script>
+/* Repair card editor and detail navigation */
+async function krGetStaticCards(){
+ const out=[];
+ document.querySelectorAll('section').forEach((section,si)=>{
+  Array.from(section.querySelectorAll('.card')).filter(c=>!c.closest('.kr-custom-cards')).forEach((card,ci)=>{
+   if(!card.dataset.krCardId)card.dataset.krCardId=(section.id||('section'+si))+'_card_'+ci;
+   out.push({id:card.dataset.krCardId,card,title:card.querySelector('.card-body b')?.textContent?.trim()||card.querySelector('.card-body h3')?.textContent?.trim()||'หัวข้อ',section:section.querySelector('.heading h2')?.textContent?.trim()||section.id||'หัวข้อ'});
+  });
+ });
+ return out;
+}
+async function krGetCardOverrides(){
+ const x=await krTx('meta','readonly',s=>s.get('cardOverrides'));return x?.value||{};
+}
+async function krSaveCardOverrides(value){await krTx('meta','readwrite',s=>s.put({key:'cardOverrides',value}));}
+async function krRenderStaticCardOverrides(){
+ const [cards,all]=await Promise.all([krGetStaticCards(),krGetCardOverrides()]);
+ cards.forEach(c=>{const ov=all[c.id];if(!ov)return;const title=c.card.querySelector('.card-body b,.card-body h3');if(title)title.textContent=ov.title||c.title;const img=c.card.querySelector('img');if(img&&ov.cover)img.src=ov.cover;});
+}
+async function krRefreshCardEditor(){
+ const sel=document.getElementById('krCardTarget');if(!sel)return;
+ const cards=await krGetStaticCards(), all=await krGetCardOverrides(), previous=sel.value;sel.innerHTML='';
+ cards.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.section+' — '+(all[c.id]?.title||c.title);sel.appendChild(o)});
+ if(cards.some(c=>c.id===previous))sel.value=previous;
+ await krLoadCardEditor();
+}
+async function krLoadCardEditor(){
+ const sel=document.getElementById('krCardTarget');if(!sel?.value)return;
+ const c=(await krGetStaticCards()).find(x=>x.id===sel.value);if(!c)return;
+ const ov=(await krGetCardOverrides())[c.id]||{};
+ document.getElementById('krCardTitle').value=ov.title||c.title;
+ document.getElementById('krCardDescription').value=ov.description||'';
+ document.getElementById('krCardCoverFile').value='';document.getElementById('krCardPhotos').value='';
+ await krRenderCardPhotos(c.id);
+}
+async function krSaveCardEdits(){
+ const id=document.getElementById('krCardTarget').value,title=document.getElementById('krCardTitle').value.trim(),description=document.getElementById('krCardDescription').value.trim(),file=document.getElementById('krCardCoverFile').files?.[0];
+ if(!title){alert('กรุณากรอกชื่อหัวข้อ');return}
+ try{const all=await krGetCardOverrides(),ov={...(all[id]||{}),title,description};if(file)ov.cover=await krCompressImage(file);all[id]=ov;await krSaveCardOverrides(all);await krRenderStaticCardOverrides();await krRefreshCardEditor();document.getElementById('krManageStatus').textContent='บันทึกชื่อ ภาพหน้าปก และรายละเอียดแล้ว';}
+ catch(e){alert('บันทึกไม่สำเร็จ: '+e.message)}
+}
+async function krRemoveCardCover(){
+ const id=document.getElementById('krCardTarget').value,all=await krGetCardOverrides();if(all[id])delete all[id].cover;await krSaveCardOverrides(all);await krRenderStaticCardOverrides();await krLoadCardEditor();document.getElementById('krManageStatus').textContent='คืนภาพหน้าปกเดิมแล้ว';
+}
+async function krAddCardPhotos(){
+ const id=document.getElementById('krCardTarget').value,files=Array.from(document.getElementById('krCardPhotos').files||[]);if(!files.length){alert('กรุณาเลือกรูปด้านใน');return}
+ try{const ov=(await krGetCardOverrides())[id]||{};for(let i=0;i<files.length;i++){const f=files[i];await krSaveItem({id:'cardimg_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,8),category:'card:'+id,caption:f.name.replace(/\.[^.]+$/,''),description:ov.description||'',image:await krCompressImage(f),originalName:f.name,createdAt:new Date().toISOString()});document.getElementById('krManageStatus').textContent='กำลังบันทึกรูป '+(i+1)+'/'+files.length;}
+ document.getElementById('krCardPhotos').value='';await krRenderCardPhotos(id);document.getElementById('krManageStatus').textContent='บันทึกรูปด้านในเรียบร้อยแล้ว';}catch(e){alert('บันทึกรูปไม่สำเร็จ: '+e.message)}
+}
+async function krRenderCardPhotos(id){
+ const box=document.getElementById('krCardPhotoManage');if(!box)return;box.innerHTML='';
+ const d=await krGetData(),items=d.items.filter(i=>i.category==='card:'+id);if(!items.length){box.textContent='ยังไม่มีรูปด้านในของหัวข้อนี้';return}
+ items.forEach(item=>{const row=document.createElement('div');row.className='kr-card-photo-item';const im=document.createElement('img');im.src=item.image;const name=document.createElement('span');name.textContent=item.caption||item.originalName||'รูป';const del=document.createElement('button');del.className='kr-delete-btn';del.textContent='ลบ';del.style.width='auto';del.onclick=async()=>{if(confirm('ต้องการลบรูปนี้หรือไม่?')){await krDeleteItem(item.id);await krRenderCardPhotos(id)}};row.append(im,name,del);box.appendChild(row)});
+}
+async function krOpenCardDetail(id){
+ const card=(await krGetStaticCards()).find(c=>c.id===id);if(!card)return;
+ const ov=(await krGetCardOverrides())[id]||{}, d=await krGetData(),items=d.items.filter(i=>i.category==='card:'+id);
+ document.getElementById('krManage').style.display='none';
+ document.getElementById('krDetailTitle').textContent=ov.title||card.title;
+ document.getElementById('krDetailDescription').textContent=ov.description||'';
+ const main=document.getElementById('krDetailImage'),base=card.card.querySelector('img');
+ main.src=ov.cover||(base?base.src:'');main.style.display='block';
+ const gallery=document.getElementById('krDetailGallery');gallery.innerHTML='';
+ items.forEach(item=>{const fig=document.createElement('figure'),im=document.createElement('img');im.src=item.image;im.alt=item.caption||'';im.onclick=()=>{main.src=item.image};const cap=document.createElement('figcaption');cap.textContent=item.caption||'';const del=document.createElement('button');del.className='kr-gallery-delete';del.textContent='ลบรูป';del.onclick=async()=>{if(confirm('ลบรูปนี้หรือไม่?')){await krDeleteItem(item.id);await krOpenCardDetail(id)}};fig.append(im,cap,del);gallery.appendChild(fig)});
+ document.getElementById('krDetail').style.display='flex';
+}
+document.getElementById('krCardTarget')?.addEventListener('change',krLoadCardEditor);
+document.addEventListener('click',async function(e){
+ const card=e.target.closest?.('section .card:not(.kr-custom-cards .card)');
+ if(!card||card.closest('#krManage')||card.closest('#krDetail'))return;
+ e.preventDefault();e.stopImmediatePropagation();
+ const cards=await krGetStaticCards(),found=cards.find(c=>c.card===card);if(found)await krOpenCardDetail(found.id);
+},true);
+(async()=>{try{await krRenderStaticCardOverrides();await krRefreshCardEditor()}catch(e){console.error('Card editor init:',e)}})();
+</script>
+
 </body></html>
