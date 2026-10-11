@@ -59,6 +59,23 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 @media(max-width:600px){.kr-modal{padding:18px 14px}.kr-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 
+
+<style>
+.kr-cover-tools,.kr-uploaded-manage{margin-top:18px;padding:16px;background:#f7f8fa;border:1px solid #e4e7eb;border-radius:12px}
+.kr-cover-tools h3,.kr-uploaded-manage h3{font-size:16px;margin:0 0 8px}
+.kr-cover-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kr-cover-row input{max-width:100%;min-width:180px;flex:1}
+.kr-uploaded-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:10px}
+.kr-uploaded-item{background:#fff;border:1px solid #e0e4e8;border-radius:10px;padding:8px;min-width:0}
+.kr-uploaded-item img{width:100%;height:95px;object-fit:cover;border-radius:6px}
+.kr-uploaded-item .kr-uploaded-name{font-size:12px;overflow-wrap:anywhere;margin:5px 0}
+.kr-delete-btn{background:#c92027;color:white;border:0;border-radius:7px;padding:7px 10px;cursor:pointer;width:100%}
+.kr-category-cover{width:100%;max-height:320px;object-fit:cover;border-radius:14px;margin:10px 0 20px;display:block}
+.kr-gallery figure{position:relative}
+.kr-gallery .kr-gallery-delete{margin-top:6px;background:#c92027;color:white;border:0;border-radius:6px;padding:5px 8px;cursor:pointer}
+@media(max-width:600px){.kr-cover-row{align-items:stretch}.kr-cover-row button{flex:1}}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="container top-inner">
@@ -132,6 +149,13 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <button class="manage-fab" type="button" onclick="krOpenManage()">＋ เพิ่มรูป / จัดการหัวข้อ</button>
 <div id="krManage" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krManage')" aria-label="ปิด">×</button><h2>จัดการหัวข้อและรูปภาพ</h2><p class="kr-hint">เลือกรูปได้หลายรูป ระบบจะบันทึกรูปในฐานข้อมูลของเบราว์เซอร์ แสดงในหัวข้อที่เลือก และเปิดดูรายละเอียดได้</p>
 <form id="krAddForm" class="kr-form"><label>หัวข้อที่ต้องการเพิ่มรูป<select id="krCategory" required></select></label><label>ชื่อรูป / ชื่อแบบ<input id="krCaption" placeholder="เช่น โรงจอดรถ 3 คัน"></label><label class="kr-wide">เลือกรูปภาพ (เลือกได้หลายรูป)<input id="krImages" type="file" accept="image/*" multiple required></label><label class="kr-wide">รายละเอียดเพิ่มเติม<textarea id="krDescription" placeholder="ขนาด วัสดุ ราคา หรือรายละเอียดงาน"></textarea></label><div class="kr-wide"><button class="kr-action" type="submit">บันทึกรูปในหัวข้อนี้</button> <button class="kr-secondary" type="button" onclick="krShowNewCategory()">＋ สร้างหัวข้อใหม่</button></div></form>
+<div class="kr-cover-tools">
+  <h3>ภาพหน้าปกของหัวข้อ</h3>
+  <p class="kr-hint">เลือกหัวข้อด้านบน แล้วเลือกรูปเพื่อใช้เป็นภาพหน้าปกของหัวข้อนั้น</p>
+  <div class="kr-cover-row"><input id="krCoverFile" type="file" accept="image/*"><button class="kr-action" type="button" onclick="krSaveCoverFromForm()">บันทึกภาพหน้าปก</button><button class="kr-secondary" type="button" onclick="krRemoveCoverFromForm()">ลบภาพหน้าปก</button></div>
+  <div id="krCoverPreviewWrap" style="display:none;margin-top:10px"><img id="krCoverPreview" alt="ภาพหน้าปกตัวอย่าง" style="max-width:220px;max-height:130px;object-fit:cover;border-radius:10px"></div>
+</div>
+<div class="kr-uploaded-manage"><h3>รูปที่เพิ่มไว้ — กดลบเพื่อลบรูปออก</h3><div id="krUploadedList" class="kr-uploaded-list"></div></div>
 <div id="krNewCategory" style="display:none;margin-top:16px;padding:14px;background:#f7f5f1;border-radius:12px"><b>สร้างหัวข้อใหม่</b><div class="kr-form" style="margin-top:10px"><label>ชื่อหัวข้อ<input id="krNewTitle" placeholder="เช่น กันสาดหน้าบ้าน"></label><label>คำอธิบาย<input id="krNewDesc" placeholder="รายละเอียดสั้น ๆ"></label><div class="kr-wide"><button class="kr-action" type="button" onclick="krCreateCategory()">สร้างหัวข้อ</button></div></div></div>
 <p class="kr-hint" id="krManageStatus" aria-live="polite"></p></div></div>
 <div id="krDetail" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krDetail')" aria-label="ปิด">×</button><h2 id="krDetailTitle">รายละเอียด</h2><img id="krDetailImage" class="kr-detail-main" alt=""><p id="krDetailDescription"></p><div id="krDetailGallery" class="kr-gallery"></div><p><button class="kr-action" onclick="krOpenManage()">＋ เพิ่มรูปในหัวข้อนี้</button> <button class="kr-secondary" onclick="krClose('krDetail')">ปิด</button></p></div></div>
@@ -184,10 +208,21 @@ async function krGetData(){
    krTx('meta','readonly',s=>s.get('gallery')),
    krTx('items','readonly',s=>s.getAll())
  ]);
- return {categories:meta?.categories||[],items:items||[]};
+ return {categories:meta?.categories||[],covers:meta?.covers||{},items:items||[]};
 }
 async function krSaveCategories(categories){
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories}));
+ const old=await krTx('meta','readonly',s=>s.get('gallery'));
+ await krTx('meta','readwrite',s=>s.put({key:'gallery',categories,covers:old?.covers||{}}));
+}
+async function krSaveCover(category,dataUrl){
+ const old=await krTx('meta','readonly',s=>s.get('gallery'));
+ const covers={...(old?.covers||{})};covers[category]=dataUrl;
+ await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
+}
+async function krDeleteCover(category){
+ const old=await krTx('meta','readonly',s=>s.get('gallery'));
+ const covers={...(old?.covers||{})};delete covers[category];
+ await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
 }
 async function krSaveItem(item){ await krTx('items','readwrite',s=>s.put(item)); }
 async function krDeleteItem(id){ await krTx('items','readwrite',s=>s.delete(id)); }
@@ -202,6 +237,11 @@ async function krOpenManage(){
  document.getElementById('krManage').style.display='flex';
  document.getElementById('krDetail').style.display='none';
  await krRefreshCategorySelect();
+ const d=await krGetData(), category=document.getElementById('krCategory').value;
+ const cover=d.covers?.[category], wrap=document.getElementById('krCoverPreviewWrap');
+ if(cover){document.getElementById('krCoverPreview').src=cover;wrap.style.display='block';}
+ else wrap.style.display='none';
+ await krRenderUploadedList();
 }
 function krClose(id){document.getElementById(id).style.display='none'}
 function krShowNewCategory(){document.getElementById('krNewCategory').style.display='block'}
@@ -236,22 +276,69 @@ function krMakeCard(category,item,c){
 }
 async function krAddStoredCards(){
  const d=await krGetData();
- (d.categories||[]).forEach(c=>{
+ krAllCategories(d).forEach(c=>{
    let section=document.getElementById(c.id);
    if(!section){
      section=document.createElement('section');section.className='section';section.id=c.id;
-     section.innerHTML='<div class="container"><div class="heading"><h2></h2><p></p></div><div class="cards kr-custom-cards"></div></div>';
+     section.innerHTML='<div class="container"><div class="heading"><h2></h2><p></p></div></div>';
      const before=document.getElementById('process');
      if(before&&before.parentNode) before.parentNode.insertBefore(section,before); else document.querySelector('main')?.appendChild(section);
    }
-   const h=section.querySelector('.heading h2');if(h)h.textContent=c.title;
-   const p=section.querySelector('.heading p');if(p)p.textContent=c.desc||'เลือกรูปเพื่อดูรายละเอียด';
+   const heading=section.querySelector('.heading');
+   if(heading && c.id.startsWith('custom_')){
+     const h=heading.querySelector('h2');if(h)h.textContent=c.title;
+     const p=heading.querySelector('p');if(p)p.textContent=c.desc||'เลือกรูปเพื่อดูรายละเอียด';
+   }
+   let cover=section.querySelector(':scope > .container .kr-category-cover');
+   if(d.covers?.[c.id]){
+     if(!cover){cover=document.createElement('img');cover.className='kr-category-cover';cover.alt='ภาพหน้าปก '+c.title;heading?.insertAdjacentElement('afterend',cover);}
+     cover.src=d.covers[c.id];cover.alt='ภาพหน้าปก '+c.title;
+   } else if(cover) cover.remove();
+
    let grid=section.querySelector('.kr-custom-cards');
-   if(!grid){grid=document.createElement('div');grid.className='cards kr-custom-cards';section.querySelector('.container').appendChild(grid)}
+   if(!grid){grid=document.createElement('div');grid.className='grid6 kr-custom-cards';section.querySelector('.container')?.appendChild(grid);}
    grid.innerHTML='';
    (d.items||[]).filter(i=>i.category===c.id).forEach(i=>grid.appendChild(krMakeCard(c.id,i,c)));
  });
+ await krRenderUploadedList();
 }
+async function krRenderUploadedList(){
+ const box=document.getElementById('krUploadedList');if(!box)return;
+ const d=await krGetData();box.innerHTML='';
+ if(!d.items.length){box.textContent='ยังไม่มีรูปที่เพิ่มผ่านระบบนี้';return}
+ d.items.slice().sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||'')).forEach(item=>{
+   const c=krAllCategories(d).find(x=>x.id===item.category)||{title:item.category};
+   const el=document.createElement('div');el.className='kr-uploaded-item';
+   const im=document.createElement('img');im.src=item.image;im.alt=item.caption||'รูปที่อัปโหลด';
+   const name=document.createElement('div');name.className='kr-uploaded-name';name.textContent=(item.caption||item.originalName||'รูปภาพ')+' • '+c.title;
+   const del=document.createElement('button');del.className='kr-delete-btn';del.type='button';del.textContent='ลบรูปนี้';
+   del.onclick=async()=>{if(!confirm('ต้องการลบรูป “'+(item.caption||item.originalName||'รูปภาพ')+'” ใช่หรือไม่?'))return;try{await krDeleteItem(item.id);await krAddStoredCards();const status=document.getElementById('krManageStatus');if(status)status.textContent='ลบรูปแล้ว';}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
+   el.append(im,name,del);box.appendChild(el);
+ });
+}
+async function krSaveCoverFromForm(){
+ const category=document.getElementById('krCategory').value, file=document.getElementById('krCoverFile').files?.[0];
+ if(!file){alert('กรุณาเลือกรูปหน้าปกก่อน');return}
+ try{const data=await krCompressImage(file);await krSaveCover(category,data);await krAddStoredCards();document.getElementById('krManageStatus').textContent='บันทึกภาพหน้าปกแล้ว';document.getElementById('krCoverPreview').src=data;document.getElementById('krCoverPreviewWrap').style.display='block';}
+ catch(err){alert('บันทึกภาพหน้าปกไม่สำเร็จ: '+err.message)}
+}
+async function krRemoveCoverFromForm(){
+ const category=document.getElementById('krCategory').value;
+ try{await krDeleteCover(category);await krAddStoredCards();document.getElementById('krCoverPreviewWrap').style.display='none';document.getElementById('krCoverFile').value='';document.getElementById('krManageStatus').textContent='ลบภาพหน้าปกแล้ว';}
+ catch(err){alert('ลบภาพหน้าปกไม่สำเร็จ: '+err.message)}
+}
+document.getElementById('krCoverFile').addEventListener('change',async e=>{
+ const file=e.target.files?.[0];if(!file)return;
+ try{const data=await krCompressImage(file);document.getElementById('krCoverPreview').src=data;document.getElementById('krCoverPreviewWrap').style.display='block';}
+ catch(err){alert(err.message)}
+});
+document.getElementById('krCategory').addEventListener('change',async e=>{
+ const d=await krGetData(), cover=d.covers?.[e.target.value];
+ const wrap=document.getElementById('krCoverPreviewWrap');
+ if(cover){document.getElementById('krCoverPreview').src=cover;wrap.style.display='block';}
+ else wrap.style.display='none';
+ await krRenderUploadedList();
+});
 async function krOpenDetail(category,id){
  krCurrentCategory=category;
  const d=await krGetData(), c=krAllCategories(d).find(x=>x.id===category)||{title:'รายละเอียด',desc:''};
@@ -264,7 +351,10 @@ async function krOpenDetail(category,id){
    const fig=document.createElement('figure'), im=document.createElement('img');
    im.src=i.image;im.alt=i.caption||c.title;im.loading='lazy';im.style.cursor='pointer';
    im.onclick=()=>{main.src=i.image;document.getElementById('krDetailTitle').textContent=i.caption||c.title;document.getElementById('krDetailDescription').textContent=i.description||c.desc||''};
-   const cap=document.createElement('figcaption');cap.textContent=i.caption||c.title;fig.append(im,cap);gallery.appendChild(fig);
+   const cap=document.createElement('figcaption');cap.textContent=i.caption||c.title;
+   const del=document.createElement('button');del.className='kr-gallery-delete';del.type='button';del.textContent='ลบรูป';
+   del.onclick=async(ev)=>{ev.stopPropagation();if(!confirm('ต้องการลบรูปนี้ใช่หรือไม่?'))return;try{await krDeleteItem(i.id);await krAddStoredCards();await krOpenDetail(category,null);}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
+   fig.append(im,cap,del);gallery.appendChild(fig);
  });
  document.getElementById('krDetail').style.display='flex';
 }
