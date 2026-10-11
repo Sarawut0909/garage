@@ -76,6 +76,19 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 @media(max-width:600px){.kr-cover-row{align-items:stretch}.kr-cover-row button{flex:1}}
 </style>
 
+
+<style>
+.kr-estimate-form{max-width:820px;margin:28px auto 0;padding:24px;background:#fff;border:1px solid #e5e0da;border-radius:16px;box-shadow:0 8px 24px #17191c08}
+.kr-estimate-form h3{margin:0 0 6px}.kr-estimate-note{color:#68727c;font-size:13px}
+.kr-estimate-fields{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
+.kr-estimate-fields label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:700}
+.kr-estimate-fields input,.kr-estimate-fields textarea{width:100%;padding:11px 12px;border:1px solid #d9dee3;border-radius:8px;font:inherit;font-weight:400;background:white}
+.kr-estimate-fields .full{grid-column:1/-1}
+.kr-estimate-summary{margin-top:18px;padding:12px;background:#f7f4ef;border-radius:8px;font-weight:700}
+#krSendEstimate{border:0;cursor:pointer;font:inherit}
+@media(max-width:600px){.kr-estimate-fields{grid-template-columns:1fr}.kr-estimate-fields .full{grid-column:auto}.kr-estimate-form{padding:17px}}
+</style>
+
 </head>
 <body>
 <header class="topbar"><div class="container top-inner">
@@ -120,12 +133,27 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <article class="card"><img src="data:image/jpeg;base64,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" alt=""><div class="card-body"><b>โรงจอดรถ 6 คัน</b><span>ดูแบบ</span></div></article>
 <article class="card"><img src="data:image/jpeg;base64,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" alt=""><div class="card-body"><b>งานโปรเจกต์</b><span>ดูแบบ</span></div></article></div></div></section>
 
-<section class="section alt"><div class="container"><div class="heading"><h2>เลือกแบบที่คุณชอบ</h2><p>เลือกโครงสร้าง วัสดุ และจำนวนรถ แล้วให้เราประเมินราคาให้</p></div>
-<div class="selector">
-<div class="panel"><h3>จำนวนรถ</h3><div class="pills"><button class="pill active">2 คัน</button><button class="pill">3 คัน</button><button class="pill">4 คัน</button><button class="pill">6 คัน</button><button class="pill">มากกว่า 6 คัน</button></div></div>
-<div class="panel"><h3>รูปแบบ</h3><div class="pills"><button class="pill active">โมเดิร์น</button><button class="pill">จั่ว</button><button class="pill">ปั้นหยา</button><button class="pill">Flat Roof</button><button class="pill">ต่อกับบ้าน</button><button class="pill">อิสระ</button></div></div>
-<div class="panel"><h3>วัสดุหลังคา</h3><div class="pills"><button class="pill active">UPVC</button><button class="pill">ไวนิล</button><button class="pill">ไฟเบอร์กลาส</button><button class="pill">เมทัลชีท</button><button class="pill">PU Foam</button></div></div>
-</div><div style="text-align:center;margin-top:24px"><a class="btn red" href="#contact">ส่งแบบให้เราประเมินราคา ฟรี →</a></div></div></section>
+<section class="section alt" id="estimate"><div class="container"><div class="heading"><h2>เลือกแบบที่คุณชอบ</h2><p>เลือกโครงสร้าง วัสดุ และจำนวนรถ กรอกข้อมูลงาน แล้วส่งคำขอประเมินราคาเข้า LINE</p></div>
+<div class="selector" id="krEstimateSelector">
+<div class="panel"><h3>จำนวนรถ</h3><div class="pills" data-choice="จำนวนรถ"><button type="button" class="pill active">2 คัน</button><button type="button" class="pill">3 คัน</button><button type="button" class="pill">4 คัน</button><button type="button" class="pill">6 คัน</button><button type="button" class="pill">มากกว่า 6 คัน</button></div></div>
+<div class="panel"><h3>รูปแบบ</h3><div class="pills" data-choice="รูปแบบ"><button type="button" class="pill active">โมเดิร์น</button><button type="button" class="pill">จั่ว</button><button type="button" class="pill">ปั้นหยา</button><button type="button" class="pill">Flat Roof</button><button type="button" class="pill">ต่อกับบ้าน</button><button type="button" class="pill">อิสระ</button></div></div>
+<div class="panel"><h3>วัสดุหลังคา</h3><div class="pills" data-choice="วัสดุหลังคา"><button type="button" class="pill active">UPVC</button><button type="button" class="pill">ไวนิล</button><button type="button" class="pill">ไฟเบอร์กลาส</button><button type="button" class="pill">เมทัลชีท</button><button type="button" class="pill">PU Foam</button></div></div>
+</div>
+<div class="kr-estimate-form">
+<h3>ข้อมูลสำหรับประเมินราคา</h3>
+<p class="kr-estimate-note">เลือกขนาดและกรอกข้อมูลติดต่อ เพื่อให้ทีมงานประเมินราคาได้ใกล้เคียงขึ้น</p>
+<div class="kr-estimate-fields">
+<label>ความกว้าง (เมตร)<input id="krWidth" type="number" min="1" step="0.1" placeholder="เช่น 6"></label>
+<label>ความยาว (เมตร)<input id="krLength" type="number" min="1" step="0.1" placeholder="เช่น 5"></label>
+<label>ชื่อผู้ติดต่อ<input id="krCustomerName" type="text" placeholder="ชื่อของคุณ"></label>
+<label>เบอร์โทรศัพท์<input id="krCustomerPhone" type="tel" placeholder="เบอร์ที่ติดต่อได้"></label>
+<label class="full">จังหวัด / พื้นที่ติดตั้ง<input id="krLocation" type="text" placeholder="เช่น บางบัวทอง นนทบุรี"></label>
+<label class="full">รายละเอียดเพิ่มเติม<textarea id="krExtra" rows="3" placeholder="เช่น ต้องการเสาเฉพาะด้านหลัง หรือแนบรูปหน้างานใน LINE"></textarea></label>
+</div>
+<div class="kr-estimate-summary" id="krEstimateSummary">แบบที่เลือก: 2 คัน • โมเดิร์น • UPVC</div>
+<div style="text-align:center;margin-top:18px"><button type="button" class="btn red" id="krSendEstimate">ส่งแบบให้เราประเมินราคา ฟรี →</button></div>
+<p class="kr-estimate-note">ระบบจะจัดทำข้อความสรุปแบบที่เลือกและเปิด LINE ให้ส่งต่อให้ร้าน ราคาจริงต้องให้ทีมงานตรวจสอบขนาดและหน้างานก่อนยืนยัน</p>
+</div></div></section>
 
 <section class="section" id="process"><div class="container"><div class="heading"><h2>ทำไมลูกค้าจึงเลือกเรา</h2></div>
 <div class="steps">
@@ -456,4 +484,57 @@ document.querySelectorAll('.card:not(.kr-custom-cards .card)').forEach(card=>{
  }
 })();
 </script>
+
+<script>
+(function(){
+ const root=document.getElementById('krEstimateSelector');
+ if(!root)return;
+ const selected={ 'จำนวนรถ':'2 คัน','รูปแบบ':'โมเดิร์น','วัสดุหลังคา':'UPVC' };
+ function summary(){
+   const text=Object.entries(selected).map(([k,v])=>k+': '+v).join(' • ');
+   document.getElementById('krEstimateSummary').textContent='แบบที่เลือก: '+Object.values(selected).join(' • ');
+   return text;
+ }
+ root.querySelectorAll('.pills[data-choice]').forEach(group=>{
+   group.querySelectorAll('.pill').forEach(btn=>{
+     btn.addEventListener('click',()=>{
+       group.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+       btn.classList.add('active');
+       selected[group.dataset.choice]=btn.textContent.trim();
+       summary();
+     });
+   });
+ });
+ summary();
+ document.getElementById('krSendEstimate').addEventListener('click',()=>{
+   const width=document.getElementById('krWidth').value.trim();
+   const length=document.getElementById('krLength').value.trim();
+   const name=document.getElementById('krCustomerName').value.trim();
+   const phone=document.getElementById('krCustomerPhone').value.trim();
+   const location=document.getElementById('krLocation').value.trim();
+   const extra=document.getElementById('krExtra').value.trim();
+   if(!width||!length||Number(width)<=0||Number(length)<=0){alert('กรุณากรอกความกว้างและความยาวเป็นเมตร');return}
+   if(!name){alert('กรุณากรอกชื่อผู้ติดต่อ');return}
+   const message=[
+    'ขอประเมินราคาโรงจอดรถจากเว็บไซต์ K-Roof',
+    '',
+    'จำนวนรถ: '+selected['จำนวนรถ'],
+    'รูปแบบ: '+selected['รูปแบบ'],
+    'วัสดุหลังคา: '+selected['วัสดุหลังคา'],
+    'ขนาด: กว้าง '+width+' ม. × ยาว '+length+' ม.',
+    'ชื่อผู้ติดต่อ: '+name,
+    'เบอร์โทรศัพท์: '+(phone||'ยังไม่ได้ระบุ'),
+    'พื้นที่ติดตั้ง: '+(location||'ยังไม่ได้ระบุ'),
+    'รายละเอียดเพิ่มเติม: '+(extra||'ไม่มี'),
+    '',
+    'รบกวนทีมงาน K-Roof ประเมินราคาและแจ้งใบเสนอราคากลับด้วยครับ/ค่ะ'
+   ].join('\n');
+   try{navigator.clipboard?.writeText(message).catch(()=>{});}catch(e){}
+   const url='https://line.me/R/msg/text/?'+encodeURIComponent(message);
+   window.open(url,'_blank','noopener');
+   alert('จัดทำข้อความสรุปแล้ว หาก LINE ไม่แสดงข้อความอัตโนมัติ ให้คัดลอกข้อความที่ระบบเตรียมไว้แล้ววางในแชต LINE ของ K-Roof และกดส่ง');
+ });
+})();
+</script>
+
 </body></html>
