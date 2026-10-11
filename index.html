@@ -102,6 +102,8 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 @media(max-width:600px){.kr-card-editor .kr-form{grid-template-columns:1fr}.kr-card-editor .kr-wide{grid-column:auto}}
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="./config.js"></script>
 </head>
 <body>
 <header class="topbar"><div class="container top-inner">
@@ -188,6 +190,22 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <div class="floating"><a class="btn green" href="https://lin.ee/Yz2WhXb">LINE</a><a class="btn red" href="tel:0927968777">โทร</a></div>
 
 <button class="manage-fab" type="button" onclick="krOpenManage()">＋ เพิ่มรูป / จัดการหัวข้อ</button>
+
+<div id="krAdminLogin" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px">
+ <div style="background:#fff;border-radius:16px;padding:24px;width:min(420px,100%);position:relative">
+  <button type="button" onclick="krCloseAdminLogin()" style="position:absolute;right:12px;top:10px;border:0;border-radius:50%;width:34px;height:34px;font-size:22px;cursor:pointer">×</button>
+  <h2 style="margin-top:0">เข้าสู่ระบบผู้ดูแล</h2>
+  <p style="color:#66717c;font-size:14px">เฉพาะบัญชีผู้ดูแลที่ได้รับอนุญาตเท่านั้น จึงจะเพิ่มรูป แก้ไขหัวข้อ หรือลบข้อมูลได้</p>
+  <form id="krAdminLoginForm" style="display:grid;gap:12px">
+   <label style="display:grid;gap:5px">อีเมลผู้ดูแล<input id="krAdminEmail" type="email" autocomplete="username" required style="padding:11px;border:1px solid #ccd2d8;border-radius:8px"></label>
+   <label style="display:grid;gap:5px">รหัสผ่าน<input id="krAdminPassword" type="password" autocomplete="current-password" required style="padding:11px;border:1px solid #ccd2d8;border-radius:8px"></label>
+   <button id="krAdminLoginSubmit" type="submit" style="padding:12px;border:0;border-radius:8px;background:#df151e;color:#fff;font-weight:700;cursor:pointer">เข้าสู่ระบบ</button>
+   <button type="button" onclick="krAdminLogout()" style="padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">ออกจากระบบผู้ดูแล</button>
+   <p id="krAdminLoginStatus" style="margin:0;font-size:13px;color:#b42318"></p>
+  </form>
+ </div>
+</div>
+
 <div id="krManage" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krManage')" aria-label="ปิด">×</button><h2>จัดการหัวข้อและรูปภาพ</h2><p class="kr-hint">เลือกรูปได้หลายรูป ระบบจะบันทึกรูปในฐานข้อมูลของเบราว์เซอร์ แสดงในหัวข้อที่เลือก และเปิดดูรายละเอียดได้</p>
 <form id="krAddForm" class="kr-form"><label>หัวข้อที่ต้องการเพิ่มรูป<select id="krCategory" required></select></label><label>ชื่อรูป / ชื่อแบบ<input id="krCaption" placeholder="เช่น โรงจอดรถ 3 คัน"></label><label class="kr-wide">เลือกรูปภาพ (เลือกได้หลายรูป)<input id="krImages" type="file" accept="image/*" multiple required></label><label class="kr-wide">รายละเอียดเพิ่มเติม<textarea id="krDescription" placeholder="ขนาด วัสดุ ราคา หรือรายละเอียดงาน"></textarea></label><div class="kr-wide"><button class="kr-action" type="submit">บันทึกรูปในหัวข้อนี้</button> <button class="kr-secondary" type="button" onclick="krShowNewCategory()">＋ สร้างหัวข้อใหม่</button></div></form>
 <div class="kr-cover-tools">
@@ -287,7 +305,64 @@ async function krRefreshCategorySelect(){
  krAllCategories(d).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.title;sel.appendChild(o)});
  sel.value=krCurrentCategory||'count';
 }
+async let krAdminSession=null;
+function krSupabaseClient(){
+ if(!window.supabase || !window.KROOF_SUPABASE_CONFIG ||
+    !window.KROOF_SUPABASE_CONFIG.url || !window.KROOF_SUPABASE_CONFIG.anonKey ||
+    window.KROOF_SUPABASE_CONFIG.url.includes('YOUR_') ||
+    window.KROOF_SUPABASE_CONFIG.anonKey.includes('YOUR_')) return null;
+ if(!window.__kroofSupabase) window.__kroofSupabase=window.supabase.createClient(
+   window.KROOF_SUPABASE_CONFIG.url,window.KROOF_SUPABASE_CONFIG.anonKey);
+ return window.__kroofSupabase;
+}
+async function krCheckAdmin(){
+ const client=krSupabaseClient();
+ if(!client)return {ok:false,message:'ยังไม่ได้ตั้งค่า Supabase ในไฟล์ config.js กรุณาตั้งค่าระบบผู้ดูแลก่อน'};
+ const {data:{session}}=await client.auth.getSession();
+ if(!session)return {ok:false,message:'กรุณาเข้าสู่ระบบผู้ดูแล'};
+ const {data,error}=await client.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();
+ if(error || !data)return {ok:false,message:'บัญชีนี้ไม่ได้รับสิทธิ์ผู้ดูแล'};
+ krAdminSession=session;
+ return {ok:true,session};
+}
+function krShowAdminLogin(message=''){
+ document.getElementById('krAdminLogin').style.display='flex';
+ document.getElementById('krAdminLoginStatus').textContent=message;
+ document.getElementById('krAdminPassword').value='';
+}
+function krCloseAdminLogin(){document.getElementById('krAdminLogin').style.display='none'}
 async function krOpenManage(){
+ const check=await krCheckAdmin();
+ if(!check.ok){krShowAdminLogin(check.message);return}
+ krCloseAdminLogin();
+ return krOpenManageUnlocked();
+}
+async function krAdminLogout(){
+ const client=krSupabaseClient();
+ if(client)await client.auth.signOut();
+ krAdminSession=null;
+ document.getElementById('krManage').style.display='none';
+ document.getElementById('krAdminLoginStatus').textContent='ออกจากระบบแล้ว';
+}
+document.getElementById('krAdminLoginForm')?.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const status=document.getElementById('krAdminLoginStatus'),btn=document.getElementById('krAdminLoginSubmit');
+ const client=krSupabaseClient();
+ if(!client){status.textContent='ยังไม่ได้ตั้งค่า Supabase ใน config.js';return}
+ btn.disabled=true;status.textContent='กำลังตรวจสอบบัญชี...';
+ try{
+   const {error}=await client.auth.signInWithPassword({
+     email:document.getElementById('krAdminEmail').value.trim(),
+     password:document.getElementById('krAdminPassword').value
+   });
+   if(error)throw error;
+   const check=await krCheckAdmin();
+   if(!check.ok){await client.auth.signOut();throw new Error(check.message)}
+   krCloseAdminLogin();await krOpenManageUnlocked();
+ }catch(err){status.textContent='เข้าสู่ระบบไม่สำเร็จ: '+(err.message||'กรุณาตรวจสอบอีเมลและรหัสผ่าน')}
+ finally{btn.disabled=false}
+});
+async function krOpenManageUnlocked(){
  document.getElementById('krManage').style.display='flex';
  document.getElementById('krDetail').style.display='none';
  await krRefreshCategorySelect();
@@ -301,6 +376,7 @@ async function krOpenManage(){
 function krClose(id){document.getElementById(id).style.display='none'}
 function krShowNewCategory(){document.getElementById('krNewCategory').style.display='block'}
 async function krCreateCategory(){
+ const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return;}
  const title=document.getElementById('krNewTitle').value.trim();
  if(!title){alert('กรุณาใส่ชื่อหัวข้อ');return}
  try{
@@ -369,17 +445,19 @@ async function krRenderUploadedList(){
    const im=document.createElement('img');im.src=item.image;im.alt=item.caption||'รูปที่อัปโหลด';
    const name=document.createElement('div');name.className='kr-uploaded-name';name.textContent=(item.caption||item.originalName||'รูปภาพ')+' • '+c.title;
    const del=document.createElement('button');del.className='kr-delete-btn';del.type='button';del.textContent='ลบรูปนี้';
-   del.onclick=async()=>{if(!confirm('ต้องการลบรูป “'+(item.caption||item.originalName||'รูปภาพ')+'” ใช่หรือไม่?'))return;try{await krDeleteItem(item.id);await krAddStoredCards();const status=document.getElementById('krManageStatus');if(status)status.textContent='ลบรูปแล้ว';}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
+   del.onclick=async()=>{const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(!confirm('ต้องการลบรูป “'+(item.caption||item.originalName||'รูปภาพ')+'” ใช่หรือไม่?'))return;try{await krDeleteItem(item.id);await krAddStoredCards();const status=document.getElementById('krManageStatus');if(status)status.textContent='ลบรูปแล้ว';}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
    el.append(im,name,del);box.appendChild(el);
  });
 }
 async function krSaveCoverFromForm(){
+ const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return;}
  const category=document.getElementById('krCategory').value, file=document.getElementById('krCoverFile').files?.[0];
  if(!file){alert('กรุณาเลือกรูปหน้าปกก่อน');return}
  try{const data=await krCompressImage(file);await krSaveCover(category,data);await krAddStoredCards();document.getElementById('krManageStatus').textContent='บันทึกภาพหน้าปกแล้ว';document.getElementById('krCoverPreview').src=data;document.getElementById('krCoverPreviewWrap').style.display='block';}
  catch(err){alert('บันทึกภาพหน้าปกไม่สำเร็จ: '+err.message)}
 }
 async function krRemoveCoverFromForm(){
+ const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return;}
  const category=document.getElementById('krCategory').value;
  try{await krDeleteCover(category);await krAddStoredCards();document.getElementById('krCoverPreviewWrap').style.display='none';document.getElementById('krCoverFile').value='';document.getElementById('krManageStatus').textContent='ลบภาพหน้าปกแล้ว';}
  catch(err){alert('ลบภาพหน้าปกไม่สำเร็จ: '+err.message)}
@@ -410,7 +488,7 @@ async function krOpenDetail(category,id){
    im.onclick=()=>{main.src=i.image;document.getElementById('krDetailTitle').textContent=i.caption||c.title;document.getElementById('krDetailDescription').textContent=i.description||c.desc||''};
    const cap=document.createElement('figcaption');cap.textContent=i.caption||c.title;
    const del=document.createElement('button');del.className='kr-gallery-delete';del.type='button';del.textContent='ลบรูป';
-   del.onclick=async(ev)=>{ev.stopPropagation();if(!confirm('ต้องการลบรูปนี้ใช่หรือไม่?'))return;try{await krDeleteItem(i.id);await krAddStoredCards();await krOpenDetail(category,null);}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
+   del.onclick=async(ev)=>{ev.stopPropagation();const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(!confirm('ต้องการลบรูปนี้ใช่หรือไม่?'))return;try{await krDeleteItem(i.id);await krAddStoredCards();await krOpenDetail(category,null);}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
    fig.append(im,cap,del);gallery.appendChild(fig);
  });
  document.getElementById('krDetail').style.display='flex';
@@ -443,6 +521,7 @@ document.getElementById('krImages').addEventListener('change',e=>{
 });
 document.getElementById('krAddForm').addEventListener('submit',async e=>{
  e.preventDefault();
+ const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return;}
  const files=Array.from(document.getElementById('krImages').files||[]);
  if(!files.length){alert('กรุณาเลือกรูปภาพก่อน');return}
  const category=document.getElementById('krCategory').value;krCurrentCategory=category;
@@ -603,15 +682,18 @@ async function krLoadCardEditor(){
  await krRenderCardPhotos(c.id);
 }
 async function krSaveCardEdits(){
+ const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return;}
  const id=document.getElementById('krCardTarget').value,title=document.getElementById('krCardTitle').value.trim(),description=document.getElementById('krCardDescription').value.trim(),file=document.getElementById('krCardCoverFile').files?.[0];
  if(!title){alert('กรุณากรอกชื่อหัวข้อ');return}
  try{const all=await krGetCardOverrides(),ov={...(all[id]||{}),title,description};if(file)ov.cover=await krCompressImage(file);all[id]=ov;await krSaveCardOverrides(all);await krRenderStaticCardOverrides();await krRefreshCardEditor();document.getElementById('krManageStatus').textContent='บันทึกชื่อ ภาพหน้าปก และรายละเอียดแล้ว';}
  catch(e){alert('บันทึกไม่สำเร็จ: '+e.message)}
 }
 async function krRemoveCardCover(){
+ const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return;}
  const id=document.getElementById('krCardTarget').value,all=await krGetCardOverrides();if(all[id])delete all[id].cover;await krSaveCardOverrides(all);await krRenderStaticCardOverrides();await krLoadCardEditor();document.getElementById('krManageStatus').textContent='คืนภาพหน้าปกเดิมแล้ว';
 }
 async function krAddCardPhotos(){
+ const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return;}
  const id=document.getElementById('krCardTarget').value,files=Array.from(document.getElementById('krCardPhotos').files||[]);if(!files.length){alert('กรุณาเลือกรูปด้านใน');return}
  try{const ov=(await krGetCardOverrides())[id]||{};for(let i=0;i<files.length;i++){const f=files[i];await krSaveItem({id:'cardimg_'+Date.now()+'_'+i+'_'+Math.random().toString(36).slice(2,8),category:'card:'+id,caption:f.name.replace(/\.[^.]+$/,''),description:ov.description||'',image:await krCompressImage(f),originalName:f.name,createdAt:new Date().toISOString()});document.getElementById('krManageStatus').textContent='กำลังบันทึกรูป '+(i+1)+'/'+files.length;}
  document.getElementById('krCardPhotos').value='';await krRenderCardPhotos(id);document.getElementById('krManageStatus').textContent='บันทึกรูปด้านในเรียบร้อยแล้ว';}catch(e){alert('บันทึกรูปไม่สำเร็จ: '+e.message)}
