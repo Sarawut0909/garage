@@ -305,7 +305,7 @@ async function krRefreshCategorySelect(){
  krAllCategories(d).forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.title;sel.appendChild(o)});
  sel.value=krCurrentCategory||'count';
 }
-async let krAdminSession=null;
+let krAdminSession=null;
 function krSupabaseClient(){
  if(!window.supabase || !window.KROOF_SUPABASE_CONFIG ||
     !window.KROOF_SUPABASE_CONFIG.url || !window.KROOF_SUPABASE_CONFIG.anonKey ||
