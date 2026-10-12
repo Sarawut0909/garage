@@ -189,7 +189,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <div><b>เมนู</b><p class="small"><a href="#count">จำนวนรถ</a><br><a href="#structure">โครงสร้าง</a><br><a href="#material">วัสดุ</a><br><a href="#work">ผลงาน</a></p></div></div></footer>
 <div class="floating"><a class="btn green" href="https://lin.ee/Yz2WhXb">LINE</a><a class="btn red" href="tel:0927968777">โทร</a></div>
 
-<button class="manage-fab" type="button" onclick="krOpenManage()">＋ เพิ่มรูป / จัดการหัวข้อ</button>
+
 
 <div id="krAdminLogin" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px">
  <div style="background:#fff;border-radius:16px;padding:24px;width:min(420px,100%);position:relative">
@@ -200,7 +200,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
    <label style="display:grid;gap:5px">อีเมลผู้ดูแล<input id="krAdminEmail" type="email" autocomplete="username" required style="padding:11px;border:1px solid #ccd2d8;border-radius:8px"></label>
    <label style="display:grid;gap:5px">รหัสผ่าน<input id="krAdminPassword" type="password" autocomplete="current-password" required style="padding:11px;border:1px solid #ccd2d8;border-radius:8px"></label>
    <button id="krAdminLoginSubmit" type="submit" style="padding:12px;border:0;border-radius:8px;background:#df151e;color:#fff;font-weight:700;cursor:pointer">เข้าสู่ระบบ</button>
-   <button type="button" onclick="krAdminLogout()" style="padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">ออกจากระบบผู้ดูแล</button>
+   
    <p id="krAdminLoginStatus" style="margin:0;font-size:13px;color:#b42318"></p>
   </form>
  </div>
@@ -230,7 +230,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 </div>
 <div id="krNewCategory" style="display:none;margin-top:16px;padding:14px;background:#f7f5f1;border-radius:12px"><b>สร้างหัวข้อใหม่</b><div class="kr-form" style="margin-top:10px"><label>ชื่อหัวข้อ<input id="krNewTitle" placeholder="เช่น กันสาดหน้าบ้าน"></label><label>คำอธิบาย<input id="krNewDesc" placeholder="รายละเอียดสั้น ๆ"></label><div class="kr-wide"><button class="kr-action" type="button" onclick="krCreateCategory()">สร้างหัวข้อ</button></div></div></div>
 <p class="kr-hint" id="krManageStatus" aria-live="polite"></p></div></div>
-<div id="krDetail" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krDetail')" aria-label="ปิด">×</button><h2 id="krDetailTitle">รายละเอียด</h2><img id="krDetailImage" class="kr-detail-main" alt=""><p id="krDetailDescription"></p><div id="krDetailGallery" class="kr-gallery"></div><p><button class="kr-action" onclick="krOpenManage()">＋ เพิ่มรูปในหัวข้อนี้</button> <button class="kr-secondary" onclick="krClose('krDetail')">ปิด</button></p></div></div>
+<div id="krDetail" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krDetail')" aria-label="ปิด">×</button><h2 id="krDetailTitle">รายละเอียด</h2><img id="krDetailImage" class="kr-detail-main" alt=""><p id="krDetailDescription"></p><div id="krDetailGallery" class="kr-gallery"></div><p><button class="kr-action" onclick="krOpenManageFromContent()">＋ เพิ่มรูปในหัวข้อนี้</button> <button class="kr-secondary" onclick="krClose('krDetail')">ปิด</button></p></div></div>
 
 <script>
 document.querySelectorAll(".pills").forEach(group=>{
@@ -324,6 +324,7 @@ async function krCheckAdmin(){
  if(error)return {ok:false,message:'ตรวจสอบสิทธิ์ Admin ไม่สำเร็จ: '+error.message};
  if(!data)return {ok:false,message:'ไม่พบ UID ของบัญชีที่เข้าสู่ระบบในตาราง admin_users (UID: '+session.user.id+')'};
  krAdminSession=session;
+ if(typeof krUpdateAdminAccessButton==='function')krUpdateAdminAccessButton(true);
  return {ok:true,session};
 }
 function krShowAdminLogin(message=''){
@@ -342,6 +343,7 @@ async function krAdminLogout(){
  const client=krSupabaseClient();
  if(client)await client.auth.signOut();
  krAdminSession=null;
+ if(typeof krUpdateAdminAccessButton==='function')krUpdateAdminAccessButton(false);
  document.getElementById('krManage').style.display='none';
  document.getElementById('krAdminLoginStatus').textContent='ออกจากระบบแล้ว';
 }
@@ -740,5 +742,68 @@ document.addEventListener('click',async function(e){
   <p id="krEstimateLineStatus" style="font-size:13px;color:#52606d;margin-bottom:0">ขั้นตอน: คัดลอกข้อความ → เปิด LINE → วางในแชต → กดส่ง</p>
  </div>
 </div>
+
+
+<footer id="krAdminAccessFooter" style="background:#111820;color:#fff;padding:24px 16px;text-align:center;margin-top:32px">
+ <p style="margin:0 0 12px;font-size:13px;color:#cbd1d8">พื้นที่ผู้ดูแลเว็บไซต์ K-Roof</p>
+ <button id="krAdminAccessButton" type="button" onclick="krHandleAdminAccessButton()" style="background:#d71920;color:#fff;border:0;border-radius:10px;padding:12px 22px;font-weight:800;font-size:14px;cursor:pointer">เข้าสู่ระบบผู้ดูแล</button>
+ <p id="krAdminAccessStatus" aria-live="polite" style="margin:10px 0 0;font-size:12px;color:#cbd1d8"></p>
+</footer>
+<script>
+function krUpdateAdminAccessButton(isAdmin){
+ const button=document.getElementById('krAdminAccessButton');
+ const status=document.getElementById('krAdminAccessStatus');
+ if(!button)return;
+ button.textContent=isAdmin?'ออกจากระบบผู้ดูแล':'เข้าสู่ระบบผู้ดูแล';
+ button.setAttribute('aria-label',button.textContent);
+ if(status)status.textContent=isAdmin?'เข้าสู่ระบบผู้ดูแลแล้ว':'สำหรับเจ้าของร้านเท่านั้น';
+}
+async function krHandleAdminAccessButton(){
+ const button=document.getElementById('krAdminAccessButton');
+ if(button)button.disabled=true;
+ try{
+  const client=krSupabaseClient();
+  const sessionResult=client?await client.auth.getSession():null;
+  const session=sessionResult?.data?.session;
+  if(session){
+   const check=await krCheckAdmin();
+   if(check.ok){await krAdminLogout();krUpdateAdminAccessButton(false);return;}
+   if(client)await client.auth.signOut();
+   krAdminSession=null;krUpdateAdminAccessButton(false);
+  }
+  await krOpenManage();
+ }catch(err){
+  const status=document.getElementById('krAdminAccessStatus');
+  if(status)status.textContent='ดำเนินการไม่สำเร็จ: '+(err.message||'กรุณาลองใหม่');
+ }finally{if(button)button.disabled=false;}
+}
+async function krOpenManageFromContent(){
+ const client=krSupabaseClient();
+ const sessionResult=client?await client.auth.getSession():null;
+ const session=sessionResult?.data?.session;
+ if(!session){
+  const status=document.getElementById('krAdminAccessStatus');
+  if(status)status.textContent='กรุณาเข้าสู่ระบบจากปุ่มด้านล่างของเว็บไซต์ก่อน';
+  document.getElementById('krAdminAccessFooter')?.scrollIntoView({behavior:'smooth',block:'end'});
+  return;
+ }
+ return krOpenManage();
+}
+(async()=>{
+ try{
+  const client=krSupabaseClient();
+  if(!client){krUpdateAdminAccessButton(false);return;}
+  const {data:{session}}=await client.auth.getSession();
+  if(!session){krUpdateAdminAccessButton(false);return;}
+  const check=await krCheckAdmin();
+  if(check.ok)krUpdateAdminAccessButton(true);
+  else{await client.auth.signOut();krUpdateAdminAccessButton(false);}
+  client.auth.onAuthStateChange((_event,sessionNow)=>{
+   if(!sessionNow)krUpdateAdminAccessButton(false);
+   else setTimeout(async()=>{try{const c=await krCheckAdmin();krUpdateAdminAccessButton(!!c.ok);}catch(_){krUpdateAdminAccessButton(false);}},0);
+  });
+ }catch(err){console.warn('Admin access button:',err);krUpdateAdminAccessButton(false);}
+})();
+</script>
 
 </body></html>
