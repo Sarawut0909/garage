@@ -41,6 +41,8 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 .manage-fab{position:fixed;left:18px;bottom:18px;z-index:1000;background:#17212b;color:#fff;border:0;border-radius:999px;padding:13px 18px;font-weight:800;box-shadow:0 6px 24px #0003;cursor:pointer}
 .card{cursor:pointer}.card:focus{outline:3px solid #d71920;outline-offset:3px}
 #krManage,#krDetail{display:none;position:fixed;inset:0;z-index:2000;background:#0009;align-items:center;justify-content:center;padding:16px}
+#krDetailImage{cursor:grab;user-select:none;-webkit-user-drag:none}
+#krDetailImage:active{cursor:grabbing}
 .kr-modal{background:white;border-radius:18px;padding:22px;width:min(760px,100%);max-height:90vh;overflow:auto;box-shadow:0 20px 70px #0004}
 .kr-modal h2{margin:0 0 14px}.kr-close{float:right;border:0;background:#eee;border-radius:50%;width:36px;height:36px;font-size:22px;cursor:pointer}
 .kr-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.kr-form label{font-size:13px;font-weight:700;display:block}.kr-form input,.kr-form select,.kr-form textarea{width:100%;padding:11px;border:1px solid #ddd;border-radius:9px;margin-top:5px;font:inherit}.kr-form textarea{min-height:75px}.kr-wide{grid-column:1/-1}.kr-action{border:0;border-radius:9px;padding:11px 16px;background:#d71920;color:#fff;font-weight:800;cursor:pointer}.kr-secondary{border:0;border-radius:9px;padding:10px 14px;background:#eee;cursor:pointer;font-weight:700}.kr-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px}.kr-gallery img{width:100%;height:140px;object-fit:cover;border-radius:10px}.kr-gallery figure{margin:0}.kr-gallery figcaption{font-size:13px;padding:5px}.kr-detail-main{width:100%;max-height:55vh;object-fit:contain;background:#f5f5f5;border-radius:12px}.kr-hint{color:#69717b;font-size:13px}.kr-newcard{border:1px dashed #aaa;border-radius:14px;padding:10px;text-align:center;background:#fff;cursor:pointer}.kr-newcard img{width:100%;height:170px;object-fit:cover;border-radius:9px}
@@ -477,10 +479,38 @@ document.getElementById('krCategory').addEventListener('change',async e=>{
  else wrap.style.display='none';
  await krRenderUploadedList();
 });
+// Swipe/drag รูปใหญ่ในหน้ารายละเอียดเพื่อดูรูปก่อนหน้า/ถัดไป
+let krSwipeImages=[];
+let krSwipeIndex=0;
+let krSwipeStartX=null;
+function krSetSwipeImages(images, currentSrc){
+ krSwipeImages=(images||[]).filter(x=>x&&x.src);
+ const found=krSwipeImages.findIndex(x=>x.src===currentSrc);
+ krSwipeIndex=found>=0?found:0;
+}
+function krShowSwipeImage(index){
+ if(!krSwipeImages.length)return;
+ krSwipeIndex=(index+krSwipeImages.length)%krSwipeImages.length;
+ const item=krSwipeImages[krSwipeIndex];
+ const main=document.getElementById('krDetailImage');
+ if(main){main.src=item.src;main.style.display='block';}
+ if(item.title!==undefined)document.getElementById('krDetailTitle').textContent=item.title;
+ if(item.description!==undefined)document.getElementById('krDetailDescription').textContent=item.description;
+}
+(function krEnableDetailSwipe(){
+ const main=document.getElementById('krDetailImage');if(!main)return;
+ main.style.touchAction='pan-y';
+ main.addEventListener('touchstart',e=>{krSwipeStartX=e.changedTouches[0].clientX},{passive:true});
+ main.addEventListener('touchend',e=>{if(krSwipeStartX===null)return;const dx=e.changedTouches[0].clientX-krSwipeStartX;krSwipeStartX=null;if(Math.abs(dx)>45)krShowSwipeImage(krSwipeIndex+(dx<0?1:-1));},{passive:true});
+ let mouseStart=null;
+ main.addEventListener('mousedown',e=>{mouseStart=e.clientX});
+ main.addEventListener('mouseup',e=>{if(mouseStart===null)return;const dx=e.clientX-mouseStart;mouseStart=null;if(Math.abs(dx)>45)krShowSwipeImage(krSwipeIndex+(dx<0?1:-1))});
+})();
 async function krOpenDetail(category,id){
  krCurrentCategory=category;
  const d=await krGetData(), c=krAllCategories(d).find(x=>x.id===category)||{title:'รายละเอียด',desc:''};
  const items=(d.items||[]).filter(i=>i.category===category), selected=items.find(i=>i.id===id)||items[0];
+ krSetSwipeImages(items.map(i=>({src:i.image,title:i.caption||c.title,description:i.description||c.desc||''})),selected?.image);
  document.getElementById('krDetailTitle').textContent=selected?(selected.caption||c.title):c.title;
  document.getElementById('krDetailDescription').textContent=(selected&&selected.description)||c.desc||'';
  const main=document.getElementById('krDetailImage');main.style.display=selected?'block':'none';if(selected)main.src=selected.image;
@@ -488,11 +518,15 @@ async function krOpenDetail(category,id){
  items.forEach(i=>{
    const fig=document.createElement('figure'), im=document.createElement('img');
    im.src=i.image;im.alt=i.caption||c.title;im.loading='lazy';im.style.cursor='pointer';
-   im.onclick=()=>{main.src=i.image;document.getElementById('krDetailTitle').textContent=i.caption||c.title;document.getElementById('krDetailDescription').textContent=i.description||c.desc||''};
+   im.onclick=()=>{main.src=i.image;krSwipeIndex=krSwipeImages.findIndex(x=>x.src===i.image);document.getElementById('krDetailTitle').textContent=i.caption||c.title;document.getElementById('krDetailDescription').textContent=i.description||c.desc||''};
    const cap=document.createElement('figcaption');cap.textContent=i.caption||c.title;
-   const del=document.createElement('button');del.className='kr-gallery-delete';del.type='button';del.textContent='ลบรูป';
-   del.onclick=async(ev)=>{ev.stopPropagation();const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(!confirm('ต้องการลบรูปนี้ใช่หรือไม่?'))return;try{await krDeleteItem(i.id);await krAddStoredCards();await krOpenDetail(category,null);}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
-   fig.append(im,cap,del);gallery.appendChild(fig);
+   fig.append(im,cap);
+   if(krAdminSession){
+     const del=document.createElement('button');del.className='kr-gallery-delete';del.type='button';del.textContent='ลบรูป';
+     del.onclick=async(ev)=>{ev.stopPropagation();const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(!confirm('ต้องการลบรูปนี้ใช่หรือไม่?'))return;try{await krDeleteItem(i.id);await krAddStoredCards();await krOpenDetail(category,null);}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
+     fig.appendChild(del);
+   }
+   gallery.appendChild(fig);
  });
  document.getElementById('krDetail').style.display='flex';
 }
@@ -714,8 +748,10 @@ async function krOpenCardDetail(id){
  document.getElementById('krDetailDescription').textContent=ov.description||'';
  const main=document.getElementById('krDetailImage'),base=card.card.querySelector('img');
  main.src=ov.cover||(base?base.src:'');main.style.display='block';
+ const coverSrc=ov.cover||(base?base.src:'');
+ krSetSwipeImages([{src:coverSrc,title:ov.title||card.title,description:ov.description||''},...items.map(item=>({src:item.image,title:item.caption||ov.title||card.title,description:item.description||ov.description||''}))],coverSrc);
  const gallery=document.getElementById('krDetailGallery');gallery.innerHTML='';
- items.forEach(item=>{const fig=document.createElement('figure'),im=document.createElement('img');im.src=item.image;im.alt=item.caption||'';im.onclick=()=>{main.src=item.image};const cap=document.createElement('figcaption');cap.textContent=item.caption||'';const del=document.createElement('button');del.className='kr-gallery-delete';del.textContent='ลบรูป';del.onclick=async()=>{if(confirm('ลบรูปนี้หรือไม่?')){await krDeleteItem(item.id);await krOpenCardDetail(id)}};fig.append(im,cap,del);gallery.appendChild(fig)});
+ items.forEach(item=>{const fig=document.createElement('figure'),im=document.createElement('img');im.src=item.image;im.alt=item.caption||'';im.onclick=()=>{main.src=item.image;krSwipeIndex=krSwipeImages.findIndex(x=>x.src===item.image)};const cap=document.createElement('figcaption');cap.textContent=item.caption||'';fig.append(im,cap);if(krAdminSession){const del=document.createElement('button');del.className='kr-gallery-delete';del.textContent='ลบรูป';del.onclick=async()=>{const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(confirm('ลบรูปนี้หรือไม่?')){await krDeleteItem(item.id);await krOpenCardDetail(id)}};fig.appendChild(del)}gallery.appendChild(fig)});
  document.getElementById('krDetail').style.display='flex';
 }
 document.getElementById('krCardTarget')?.addEventListener('change',krLoadCardEditor);
