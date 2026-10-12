@@ -277,29 +277,96 @@ function krTx(store,mode,operation){
    tx.onabort=()=>reject(tx.error||new Error('บันทึกข้อมูลไม่สำเร็จ'));
  }));
 }
-async function krGetData(){
+async function krGetLocalData(){
  const [meta,items]=await Promise.all([
    krTx('meta','readonly',s=>s.get('gallery')),
    krTx('items','readonly',s=>s.getAll())
  ]);
  return {categories:meta?.categories||[],covers:meta?.covers||{},items:items||[]};
 }
-async function krSaveCategories(categories){
+async function krGetData(){
+ const client=krSupabaseClient();
+ if(client){
+   const {data,error}=await client.from('kroof_gallery_data').select('data').eq('id','gallery').maybeSingle();
+   if(error) throw new Error('อ่านข้อมูลส่วนกลางไม่สำเร็จ: '+error.message);
+   if(data?.data) return {categories:data.data.categories||[],covers:data.data.covers||{},items:data.data.items||[]};
+ }
+ return krGetLocalData();
+}
+async function krSaveLocalData(d){
  const old=await krTx('meta','readonly',s=>s.get('gallery'));
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories,covers:old?.covers||{}}));
+ await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:d.categories||[],covers:d.covers||old?.covers||{}}));
+ const current=await krTx('items','readonly',s=>s.getAll());
+ const keep=new Set((d.items||[]).map(x=>x.id));
+ for(const item of current) if(!keep.has(item.id)) await krTx('items','readwrite',s=>s.delete(item.id));
+ for(const item of (d.items||[])) await krTx('items','readwrite',s=>s.put(item));
+}
+async function krPersistRemoteData(d){
+ const client=krSupabaseClient();
+ if(!client) throw new Error('ยังไม่ได้ตั้งค่า Supabase ใน config.js');
+ const payload={categories:d.categories||[],covers:d.covers||{},items:d.items||[]};
+ const {error}=await client.from('kroof_gallery_data').upsert({id:'gallery',data:payload,updated_at:new Date().toISOString()});
+ if(error) throw new Error('บันทึกข้อมูลส่วนกลางไม่สำเร็จ: '+error.message);
+ await krSaveLocalData(payload);
+}
+async function krUploadDataUrl(dataUrl,path){
+ if(!dataUrl || !String(dataUrl).startsWith('data:')) return dataUrl;
+ const client=krSupabaseClient();
+ if(!client) throw new Error('ยังไม่ได้ตั้งค่า Supabase ใน config.js');
+ const response=await fetch(dataUrl);
+ const blob=await response.blob();
+ const ext=(blob.type||'image/jpeg').includes('png')?'png':'jpg';
+ const objectPath=path+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+ const {error}=await client.storage.from('kroof-gallery').upload(objectPath,blob,{contentType:blob.type||'image/jpeg',upsert:false});
+ if(error) throw new Error('อัปโหลดรูปไปยังส่วนกลางไม่สำเร็จ: '+error.message);
+ const {data}=client.storage.from('kroof-gallery').getPublicUrl(objectPath);
+ return data.publicUrl;
+}
+async function krSeedRemoteFromLocalIfEmpty(){
+ const client=krSupabaseClient(); if(!client) return;
+ const {data,error}=await client.from('kroof_gallery_data').select('data').eq('id','gallery').maybeSingle();
+ if(error) throw new Error('ตรวจสอบข้อมูลส่วนกลางไม่สำเร็จ: '+error.message);
+ const remote=data?.data;
+ const remoteHasContent=!!(remote && ((remote.items||[]).length || Object.keys(remote.covers||{}).length || (remote.categories||[]).length));
+ if(remoteHasContent) return;
+ const local=await krGetLocalData();
+ const localHasContent=(local.items||[]).length || Object.keys(local.covers||{}).length || (local.categories||[]).length;
+ if(!localHasContent){if(!data) await krPersistRemoteData({categories:[],covers:{},items:[]});return;}
+ const migrated={categories:local.categories||[],covers:{},items:[]};
+ for(const [category,src] of Object.entries(local.covers||{})){
+   migrated.covers[category]=await krUploadDataUrl(src,'covers/'+category);
+ }
+ for(const item of (local.items||[])){
+   const copy={...item};
+   copy.image=await krUploadDataUrl(copy.image,'items/'+copy.id);
+   migrated.items.push(copy);
+ }
+ await krPersistRemoteData(migrated);
+}
+async function krSaveCategories(categories){
+ const d=await krGetData();d.categories=categories||[];
+ await krPersistRemoteData(d);
 }
 async function krSaveCover(category,dataUrl){
- const old=await krTx('meta','readonly',s=>s.get('gallery'));
- const covers={...(old?.covers||{})};covers[category]=dataUrl;
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
+ const d=await krGetData();
+ d.covers={...(d.covers||{})};
+ d.covers[category]=await krUploadDataUrl(dataUrl,'covers/'+category);
+ await krPersistRemoteData(d);
 }
 async function krDeleteCover(category){
- const old=await krTx('meta','readonly',s=>s.get('gallery'));
- const covers={...(old?.covers||{})};delete covers[category];
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
+ const d=await krGetData();d.covers={...(d.covers||{})};delete d.covers[category];
+ await krPersistRemoteData(d);
 }
-async function krSaveItem(item){ await krTx('items','readwrite',s=>s.put(item)); }
-async function krDeleteItem(id){ await krTx('items','readwrite',s=>s.delete(id)); }
+async function krSaveItem(item){
+ const d=await krGetData();
+ const copy={...item, image:await krUploadDataUrl(item.image,'items/'+item.id)};
+ d.items=(d.items||[]).filter(x=>x.id!==copy.id);d.items.push(copy);
+ await krPersistRemoteData(d);
+}
+async function krDeleteItem(id){
+ const d=await krGetData();d.items=(d.items||[]).filter(x=>x.id!==id);
+ await krPersistRemoteData(d);
+}
 function krAllCategories(d){return krDefaultCategories.concat(d.categories||[])}
 async function krRefreshCategorySelect(){
  const sel=document.getElementById('krCategory'), d=await krGetData();
@@ -326,6 +393,7 @@ async function krCheckAdmin(){
  if(error)return {ok:false,message:'ตรวจสอบสิทธิ์ Admin ไม่สำเร็จ: '+error.message};
  if(!data)return {ok:false,message:'ไม่พบ UID ของบัญชีที่เข้าสู่ระบบในตาราง admin_users (UID: '+session.user.id+')'};
  krAdminSession=session;
+ try{await krSeedRemoteFromLocalIfEmpty();}catch(syncErr){return {ok:false,message:'เข้าสู่ระบบได้ แต่ย้ายรูปเดิมขึ้นส่วนกลางไม่สำเร็จ: '+syncErr.message};}
  if(typeof krUpdateAdminAccessButton==='function')krUpdateAdminAccessButton(true);
  return {ok:true,session};
 }
@@ -578,7 +646,7 @@ document.getElementById('krAddForm').addEventListener('submit',async e=>{
      status.textContent='กำลังบันทึก '+(n+1)+'/'+files.length+' รูป...';
    }
    await krAddStoredCards();
-   status.textContent='บันทึกสำเร็จ '+files.length+' รูปแล้ว ข้อมูลเก็บในเบราว์เซอร์นี้';
+   status.textContent='บันทึกสำเร็จ '+files.length+' รูปแล้ว ข้อมูลซิงก์กับส่วนกลาง';
    document.getElementById('krImages').value='';
    document.getElementById('krCaption').value='';
    document.getElementById('krDescription').value='';
