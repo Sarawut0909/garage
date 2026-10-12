@@ -230,7 +230,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 </div>
 <div id="krNewCategory" style="display:none;margin-top:16px;padding:14px;background:#f7f5f1;border-radius:12px"><b>สร้างหัวข้อใหม่</b><div class="kr-form" style="margin-top:10px"><label>ชื่อหัวข้อ<input id="krNewTitle" placeholder="เช่น กันสาดหน้าบ้าน"></label><label>คำอธิบาย<input id="krNewDesc" placeholder="รายละเอียดสั้น ๆ"></label><div class="kr-wide"><button class="kr-action" type="button" onclick="krCreateCategory()">สร้างหัวข้อ</button></div></div></div>
 <p class="kr-hint" id="krManageStatus" aria-live="polite"></p></div></div>
-<div id="krDetail" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krDetail')" aria-label="ปิด">×</button><h2 id="krDetailTitle">รายละเอียด</h2><img id="krDetailImage" class="kr-detail-main" alt=""><p id="krDetailDescription"></p><div id="krDetailGallery" class="kr-gallery"></div><p><button class="kr-action" onclick="krOpenManageFromContent()">＋ เพิ่มรูปในหัวข้อนี้</button> <button class="kr-secondary" onclick="krClose('krDetail')">ปิด</button></p></div></div>
+<div id="krDetail" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krDetail')" aria-label="ปิด">×</button><h2 id="krDetailTitle">รายละเอียด</h2><img id="krDetailImage" class="kr-detail-main" alt=""><p id="krDetailDescription"></p><div id="krDetailGallery" class="kr-gallery"></div><p><button id="krAddPhotoInDetail" class="kr-action" onclick="krOpenManageFromContent()" style="display:none">＋ เพิ่มรูปในหัวข้อนี้</button> <button class="kr-secondary" onclick="krClose('krDetail')">ปิด</button></p></div></div>
 
 <script>
 document.querySelectorAll(".pills").forEach(group=>{
@@ -753,10 +753,13 @@ document.addEventListener('click',async function(e){
 function krUpdateAdminAccessButton(isAdmin){
  const button=document.getElementById('krAdminAccessButton');
  const status=document.getElementById('krAdminAccessStatus');
+ const addPhotoButton=document.getElementById('krAddPhotoInDetail');
  if(!button)return;
  button.textContent=isAdmin?'ออกจากระบบผู้ดูแล':'เข้าสู่ระบบผู้ดูแล';
  button.setAttribute('aria-label',button.textContent);
  if(status)status.textContent=isAdmin?'เข้าสู่ระบบผู้ดูแลแล้ว':'สำหรับเจ้าของร้านเท่านั้น';
+ // ซ่อนปุ่มเพิ่มรูปจากผู้เข้าชมทั่วไป และแสดงเฉพาะเมื่อยืนยันสิทธิ์ Admin แล้ว
+ if(addPhotoButton)addPhotoButton.style.display=isAdmin?'inline-block':'none';
 }
 async function krHandleAdminAccessButton(){
  const button=document.getElementById('krAdminAccessButton');
