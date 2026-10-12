@@ -321,7 +321,8 @@ async function krCheckAdmin(){
  const {data:{session}}=await client.auth.getSession();
  if(!session)return {ok:false,message:'กรุณาเข้าสู่ระบบผู้ดูแล'};
  const {data,error}=await client.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();
- if(error || !data)return {ok:false,message:'บัญชีนี้ไม่ได้รับสิทธิ์ผู้ดูแล'};
+ if(error)return {ok:false,message:'ตรวจสอบสิทธิ์ Admin ไม่สำเร็จ: '+error.message};
+ if(!data)return {ok:false,message:'ไม่พบ UID ของบัญชีที่เข้าสู่ระบบในตาราง admin_users (UID: '+session.user.id+')'};
  krAdminSession=session;
  return {ok:true,session};
 }
