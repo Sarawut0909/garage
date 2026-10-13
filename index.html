@@ -84,15 +84,24 @@ h1{font-size:clamp(48px,5.2vw,82px);line-height:1.04;letter-spacing:-1.5px}
 
 /* Admin-only controls must remain hidden until Supabase confirms an authorized admin session. */
 body:not(.kr-admin-authenticated) .kr-auth-logout,
-body.kr-admin-authenticated .kr-auth-login,
 body:not(.kr-admin-authenticated) .manage-fab,
+body:not(.kr-admin-authenticated) button[onclick*="krOpenManage"],
+body:not(.kr-admin-authenticated) button[onclick*="krCloseManage"],
+body.kr-admin-authenticated .kr-auth-login,
 body:not(.kr-admin-authenticated) .kr-delete-btn,
 body:not(.kr-admin-authenticated) .kr-gallery-delete,
 body:not(.kr-admin-authenticated) .kr-detail button[onclick*="krOpenManage"],
 body:not(.kr-admin-authenticated) .kr-card-photo-item button,
 body:not(.kr-admin-authenticated) .kr-card-editor button,
 body:not(.kr-admin-authenticated) .kr-cover-tools button,
-body:not(.kr-admin-authenticated) .kr-uploaded-manage button { display:none !important; }
+body:not(.kr-admin-authenticated) .kr-uploaded-manage button,
+/* Hide the add/manage and close controls shown in the admin toolbar until login succeeds. */
+body:not(.kr-admin-authenticated) .kr-admin-toolbar,
+body:not(.kr-admin-authenticated) .kr-admin-toolbar button,
+body:not(.kr-admin-authenticated) #krAdminControls,
+body:not(.kr-admin-authenticated) #krAdminControls button,
+body:not(.kr-admin-authenticated) .admin-controls,
+body:not(.kr-admin-authenticated) .admin-controls button { display:none !important; }
 
 @media(max-width:1100px){.container{width:calc(100% - 36px)}.contact{font-size:15px}.nav{gap:15px;font-size:14px}.card img{height:145px}.section{padding:60px 0}}
 @media(max-width:900px){.topbar{height:68px}.logo{font-size:21px}.logo-mark{width:38px;height:38px}.hero{min-height:560px}.hero-content{padding:72px 0}.hero p{font-size:18px}.card img{height:130px}.heading h2{font-size:32px}}
