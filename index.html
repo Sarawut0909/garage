@@ -41,8 +41,6 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 .manage-fab{position:fixed;left:18px;bottom:18px;z-index:1000;background:#17212b;color:#fff;border:0;border-radius:999px;padding:13px 18px;font-weight:800;box-shadow:0 6px 24px #0003;cursor:pointer}
 .card{cursor:pointer}.card:focus{outline:3px solid #d71920;outline-offset:3px}
 #krManage,#krDetail{display:none;position:fixed;inset:0;z-index:2000;background:#0009;align-items:center;justify-content:center;padding:16px}
-#krDetailImage{cursor:grab;user-select:none;-webkit-user-drag:none}
-#krDetailImage:active{cursor:grabbing}
 .kr-modal{background:white;border-radius:18px;padding:22px;width:min(760px,100%);max-height:90vh;overflow:auto;box-shadow:0 20px 70px #0004}
 .kr-modal h2{margin:0 0 14px}.kr-close{float:right;border:0;background:#eee;border-radius:50%;width:36px;height:36px;font-size:22px;cursor:pointer}
 .kr-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.kr-form label{font-size:13px;font-weight:700;display:block}.kr-form input,.kr-form select,.kr-form textarea{width:100%;padding:11px;border:1px solid #ddd;border-radius:9px;margin-top:5px;font:inherit}.kr-form textarea{min-height:75px}.kr-wide{grid-column:1/-1}.kr-action{border:0;border-radius:9px;padding:11px 16px;background:#d71920;color:#fff;font-weight:800;cursor:pointer}.kr-secondary{border:0;border-radius:9px;padding:10px 14px;background:#eee;cursor:pointer;font-weight:700}.kr-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:16px}.kr-gallery img{width:100%;height:140px;object-fit:cover;border-radius:10px}.kr-gallery figure{margin:0}.kr-gallery figcaption{font-size:13px;padding:5px}.kr-detail-main{width:100%;max-height:55vh;object-fit:contain;background:#f5f5f5;border-radius:12px}.kr-hint{color:#69717b;font-size:13px}.kr-newcard{border:1px dashed #aaa;border-radius:14px;padding:10px;text-align:center;background:#fff;cursor:pointer}.kr-newcard img{width:100%;height:170px;object-fit:cover;border-radius:9px}
@@ -116,7 +114,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <section class="hero"><div class="container"><div class="hero-content">
 <span class="eyebrow">CARPORT • DESIGN • BUILD</span><h1>โรงจอดรถ<br>ที่ออกแบบให้เหมาะ<br>กับบ้านของคุณ</h1>
 <p>ออกแบบ • ผลิต • ติดตั้งโรงจอดรถครบวงจร เลือกรูปแบบ ขนาด และวัสดุได้ตามต้องการ</p>
-<div class="actions"><a class="btn red" href="#count">ดูรูปแบบโรงจอดรถ →</a><a class="btn white" href="#krEstimateForm">ขอแบบประเมินราคา →</a></div>
+<div class="actions"><a class="btn red" href="#count">ดูรูปแบบโรงจอดรถ →</a><a class="btn white" href="#contact">ขอประเมินราคา →</a></div>
 </div></div></section>
 
 <section class="section" id="count"><div class="container"><div class="heading"><h2>เลือกรูปแบบโรงจอดรถตามจำนวนรถ</h2><p>เลือกขนาดที่เหมาะกับการใช้งานของคุณ</p></div>
@@ -156,7 +154,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <div class="panel"><h3>รูปแบบ</h3><div class="pills" data-choice="รูปแบบ"><button type="button" class="pill active">โมเดิร์น</button><button type="button" class="pill">จั่ว</button><button type="button" class="pill">ปั้นหยา</button><button type="button" class="pill">Flat Roof</button><button type="button" class="pill">ต่อกับบ้าน</button><button type="button" class="pill">อิสระ</button></div></div>
 <div class="panel"><h3>วัสดุหลังคา</h3><div class="pills" data-choice="วัสดุหลังคา"><button type="button" class="pill active">UPVC</button><button type="button" class="pill">ไวนิล</button><button type="button" class="pill">ไฟเบอร์กลาส</button><button type="button" class="pill">เมทัลชีท</button><button type="button" class="pill">PU Foam</button></div></div>
 </div>
-<div class="kr-estimate-form" id="krEstimateForm" style="scroll-margin-top:84px">
+<div class="kr-estimate-form">
 <h3>ข้อมูลสำหรับประเมินราคา</h3>
 <p class="kr-estimate-note">เลือกขนาดและกรอกข้อมูลติดต่อ เพื่อให้ทีมงานประเมินราคาได้ใกล้เคียงขึ้น</p>
 <div class="kr-estimate-fields">
@@ -191,7 +189,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <div><b>เมนู</b><p class="small"><a href="#count">จำนวนรถ</a><br><a href="#structure">โครงสร้าง</a><br><a href="#material">วัสดุ</a><br><a href="#work">ผลงาน</a></p></div></div></footer>
 <div class="floating"><a class="btn green" href="https://lin.ee/Yz2WhXb">LINE</a><a class="btn red" href="tel:0927968777">โทร</a></div>
 
-
+<button class="manage-fab" type="button" onclick="krOpenManage()">＋ เพิ่มรูป / จัดการหัวข้อ</button>
 
 <div id="krAdminLogin" role="dialog" aria-modal="true" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:16px">
  <div style="background:#fff;border-radius:16px;padding:24px;width:min(420px,100%);position:relative">
@@ -202,7 +200,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
    <label style="display:grid;gap:5px">อีเมลผู้ดูแล<input id="krAdminEmail" type="email" autocomplete="username" required style="padding:11px;border:1px solid #ccd2d8;border-radius:8px"></label>
    <label style="display:grid;gap:5px">รหัสผ่าน<input id="krAdminPassword" type="password" autocomplete="current-password" required style="padding:11px;border:1px solid #ccd2d8;border-radius:8px"></label>
    <button id="krAdminLoginSubmit" type="submit" style="padding:12px;border:0;border-radius:8px;background:#df151e;color:#fff;font-weight:700;cursor:pointer">เข้าสู่ระบบ</button>
-   
+   <button type="button" onclick="krAdminLogout()" style="padding:10px;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer">ออกจากระบบผู้ดูแล</button>
    <p id="krAdminLoginStatus" style="margin:0;font-size:13px;color:#b42318"></p>
   </form>
  </div>
@@ -232,7 +230,7 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 </div>
 <div id="krNewCategory" style="display:none;margin-top:16px;padding:14px;background:#f7f5f1;border-radius:12px"><b>สร้างหัวข้อใหม่</b><div class="kr-form" style="margin-top:10px"><label>ชื่อหัวข้อ<input id="krNewTitle" placeholder="เช่น กันสาดหน้าบ้าน"></label><label>คำอธิบาย<input id="krNewDesc" placeholder="รายละเอียดสั้น ๆ"></label><div class="kr-wide"><button class="kr-action" type="button" onclick="krCreateCategory()">สร้างหัวข้อ</button></div></div></div>
 <p class="kr-hint" id="krManageStatus" aria-live="polite"></p></div></div>
-<div id="krDetail" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krDetail')" aria-label="ปิด">×</button><h2 id="krDetailTitle">รายละเอียด</h2><img id="krDetailImage" class="kr-detail-main" alt=""><p id="krDetailDescription"></p><div id="krDetailGallery" class="kr-gallery"></div><p><button id="krAddPhotoInDetail" class="kr-action" onclick="krOpenManageFromContent()" style="display:none">＋ เพิ่มรูปในหัวข้อนี้</button> <button class="kr-secondary" onclick="krClose('krDetail')">ปิด</button></p></div></div>
+<div id="krDetail" role="dialog" aria-modal="true"><div class="kr-modal"><button class="kr-close" onclick="krClose('krDetail')" aria-label="ปิด">×</button><h2 id="krDetailTitle">รายละเอียด</h2><img id="krDetailImage" class="kr-detail-main" alt=""><p id="krDetailDescription"></p><div id="krDetailGallery" class="kr-gallery"></div><p><button class="kr-action" onclick="krOpenManage()">＋ เพิ่มรูปในหัวข้อนี้</button> <button class="kr-secondary" onclick="krClose('krDetail')">ปิด</button></p></div></div>
 
 <script>
 document.querySelectorAll(".pills").forEach(group=>{
@@ -277,116 +275,29 @@ function krTx(store,mode,operation){
    tx.onabort=()=>reject(tx.error||new Error('บันทึกข้อมูลไม่สำเร็จ'));
  }));
 }
-async function krGetLocalData(){
+async function krGetData(){
  const [meta,items]=await Promise.all([
    krTx('meta','readonly',s=>s.get('gallery')),
    krTx('items','readonly',s=>s.getAll())
  ]);
- const overrides=await krTx('meta','readonly',s=>s.get('cardOverrides'));
- return {categories:meta?.categories||[],covers:meta?.covers||{},items:items||[],cardOverrides:overrides?.value||{}};
-}
-async function krGetData(){
- const client=krSupabaseClient();
- if(client){
-   const {data,error}=await client.from('kroof_gallery_data').select('data').eq('id','gallery').maybeSingle();
-   if(error) throw new Error('อ่านข้อมูลส่วนกลางไม่สำเร็จ: '+error.message);
-   if(data?.data) return {categories:data.data.categories||[],covers:data.data.covers||{},items:data.data.items||[],cardOverrides:data.data.cardOverrides||{}};
- }
- return krGetLocalData();
-}
-async function krSaveLocalData(d){
- const old=await krTx('meta','readonly',s=>s.get('gallery'));
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:d.categories||[],covers:d.covers||old?.covers||{}}));
- await krTx('meta','readwrite',s=>s.put({key:'cardOverrides',value:d.cardOverrides||{}}));
- const current=await krTx('items','readonly',s=>s.getAll());
- const keep=new Set((d.items||[]).map(x=>x.id));
- for(const item of current) if(!keep.has(item.id)) await krTx('items','readwrite',s=>s.delete(item.id));
- for(const item of (d.items||[])) await krTx('items','readwrite',s=>s.put(item));
-}
-async function krPersistRemoteData(d){
- const client=krSupabaseClient();
- if(!client) throw new Error('ยังไม่ได้ตั้งค่า Supabase ใน config.js');
- const payload={categories:d.categories||[],covers:d.covers||{},items:d.items||[],cardOverrides:d.cardOverrides||{}};
- const {error}=await client.from('kroof_gallery_data').upsert({id:'gallery',data:payload,updated_at:new Date().toISOString()});
- if(error) throw new Error('บันทึกข้อมูลส่วนกลางไม่สำเร็จ: '+error.message);
- await krSaveLocalData(payload);
-}
-async function krUploadDataUrl(dataUrl,path){
- if(!dataUrl || !String(dataUrl).startsWith('data:')) return dataUrl;
- const client=krSupabaseClient();
- if(!client) throw new Error('ยังไม่ได้ตั้งค่า Supabase ใน config.js');
- const response=await fetch(dataUrl);
- const blob=await response.blob();
- const ext=(blob.type||'image/jpeg').includes('png')?'png':'jpg';
- const objectPath=path+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
- const {error}=await client.storage.from('kroof-gallery').upload(objectPath,blob,{contentType:blob.type||'image/jpeg',upsert:false});
- if(error) throw new Error('อัปโหลดรูปไปยังส่วนกลางไม่สำเร็จ: '+error.message);
- const {data}=client.storage.from('kroof-gallery').getPublicUrl(objectPath);
- return data.publicUrl;
-}
-async function krSeedRemoteFromLocalIfEmpty(){
- const client=krSupabaseClient(); if(!client) return;
- const {data,error}=await client.from('kroof_gallery_data').select('data').eq('id','gallery').maybeSingle();
- if(error) throw new Error('ตรวจสอบข้อมูลส่วนกลางไม่สำเร็จ: '+error.message);
- const remote=data?.data;
- const local=await krGetLocalData();
- const localOverrides=local.cardOverrides||{};
- if(remote){
-   const remoteHasOverrides=Object.keys(remote.cardOverrides||{}).length>0;
-   if(!remoteHasOverrides && Object.keys(localOverrides).length){
-     const migratedOverrides={...localOverrides};
-     for(const [id,ov0] of Object.entries(migratedOverrides)){
-       const ov={...ov0};
-       if(ov.cover) ov.cover=await krUploadDataUrl(ov.cover,'card-covers/'+id);
-       migratedOverrides[id]=ov;
-     }
-     await krPersistRemoteData({...remote,cardOverrides:migratedOverrides});
-   }
-   const remoteHasContent=!!((remote.items||[]).length || Object.keys(remote.covers||{}).length || (remote.categories||[]).length);
-   if(remoteHasContent || Object.keys(remote.cardOverrides||{}).length) return;
- }
- const localHasContent=(local.items||[]).length || Object.keys(local.covers||{}).length || (local.categories||[]).length || Object.keys(localOverrides).length;
- if(!localHasContent){if(!data) await krPersistRemoteData({categories:[],covers:{},items:[],cardOverrides:{}});return;}
- const migrated={categories:local.categories||[],covers:{},items:[],cardOverrides:{}};
- for(const [category,src] of Object.entries(local.covers||{})){
-   migrated.covers[category]=await krUploadDataUrl(src,'covers/'+category);
- }
- for(const item of (local.items||[])){
-   const copy={...item};
-   copy.image=await krUploadDataUrl(copy.image,'items/'+copy.id);
-   migrated.items.push(copy);
- }
- for(const [id,ov0] of Object.entries(localOverrides)){
-   const ov={...ov0};
-   if(ov.cover) ov.cover=await krUploadDataUrl(ov.cover,'card-covers/'+id);
-   migrated.cardOverrides[id]=ov;
- }
- await krPersistRemoteData(migrated);
+ return {categories:meta?.categories||[],covers:meta?.covers||{},items:items||[]};
 }
 async function krSaveCategories(categories){
- const d=await krGetData();d.categories=categories||[];
- await krPersistRemoteData(d);
+ const old=await krTx('meta','readonly',s=>s.get('gallery'));
+ await krTx('meta','readwrite',s=>s.put({key:'gallery',categories,covers:old?.covers||{}}));
 }
 async function krSaveCover(category,dataUrl){
- const d=await krGetData();
- d.covers={...(d.covers||{})};
- d.covers[category]=await krUploadDataUrl(dataUrl,'covers/'+category);
- await krPersistRemoteData(d);
+ const old=await krTx('meta','readonly',s=>s.get('gallery'));
+ const covers={...(old?.covers||{})};covers[category]=dataUrl;
+ await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
 }
 async function krDeleteCover(category){
- const d=await krGetData();d.covers={...(d.covers||{})};delete d.covers[category];
- await krPersistRemoteData(d);
+ const old=await krTx('meta','readonly',s=>s.get('gallery'));
+ const covers={...(old?.covers||{})};delete covers[category];
+ await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
 }
-async function krSaveItem(item){
- const d=await krGetData();
- const copy={...item, image:await krUploadDataUrl(item.image,'items/'+item.id)};
- d.items=(d.items||[]).filter(x=>x.id!==copy.id);d.items.push(copy);
- await krPersistRemoteData(d);
-}
-async function krDeleteItem(id){
- const d=await krGetData();d.items=(d.items||[]).filter(x=>x.id!==id);
- await krPersistRemoteData(d);
-}
+async function krSaveItem(item){ await krTx('items','readwrite',s=>s.put(item)); }
+async function krDeleteItem(id){ await krTx('items','readwrite',s=>s.delete(id)); }
 function krAllCategories(d){return krDefaultCategories.concat(d.categories||[])}
 async function krRefreshCategorySelect(){
  const sel=document.getElementById('krCategory'), d=await krGetData();
@@ -410,11 +321,8 @@ async function krCheckAdmin(){
  const {data:{session}}=await client.auth.getSession();
  if(!session)return {ok:false,message:'กรุณาเข้าสู่ระบบผู้ดูแล'};
  const {data,error}=await client.from('admin_users').select('user_id').eq('user_id',session.user.id).maybeSingle();
- if(error)return {ok:false,message:'ตรวจสอบสิทธิ์ Admin ไม่สำเร็จ: '+error.message};
- if(!data)return {ok:false,message:'ไม่พบ UID ของบัญชีที่เข้าสู่ระบบในตาราง admin_users (UID: '+session.user.id+')'};
+ if(error || !data)return {ok:false,message:'บัญชีนี้ไม่ได้รับสิทธิ์ผู้ดูแล'};
  krAdminSession=session;
- try{await krSeedRemoteFromLocalIfEmpty();}catch(syncErr){return {ok:false,message:'เข้าสู่ระบบได้ แต่ย้ายรูปเดิมขึ้นส่วนกลางไม่สำเร็จ: '+syncErr.message};}
- if(typeof krUpdateAdminAccessButton==='function')krUpdateAdminAccessButton(true);
  return {ok:true,session};
 }
 function krShowAdminLogin(message=''){
@@ -433,7 +341,6 @@ async function krAdminLogout(){
  const client=krSupabaseClient();
  if(client)await client.auth.signOut();
  krAdminSession=null;
- if(typeof krUpdateAdminAccessButton==='function')krUpdateAdminAccessButton(false);
  document.getElementById('krManage').style.display='none';
  document.getElementById('krAdminLoginStatus').textContent='ออกจากระบบแล้ว';
 }
@@ -567,38 +474,10 @@ document.getElementById('krCategory').addEventListener('change',async e=>{
  else wrap.style.display='none';
  await krRenderUploadedList();
 });
-// Swipe/drag รูปใหญ่ในหน้ารายละเอียดเพื่อดูรูปก่อนหน้า/ถัดไป
-let krSwipeImages=[];
-let krSwipeIndex=0;
-let krSwipeStartX=null;
-function krSetSwipeImages(images, currentSrc){
- krSwipeImages=(images||[]).filter(x=>x&&x.src);
- const found=krSwipeImages.findIndex(x=>x.src===currentSrc);
- krSwipeIndex=found>=0?found:0;
-}
-function krShowSwipeImage(index){
- if(!krSwipeImages.length)return;
- krSwipeIndex=(index+krSwipeImages.length)%krSwipeImages.length;
- const item=krSwipeImages[krSwipeIndex];
- const main=document.getElementById('krDetailImage');
- if(main){main.src=item.src;main.style.display='block';}
- if(item.title!==undefined)document.getElementById('krDetailTitle').textContent=item.title;
- if(item.description!==undefined)document.getElementById('krDetailDescription').textContent=item.description;
-}
-(function krEnableDetailSwipe(){
- const main=document.getElementById('krDetailImage');if(!main)return;
- main.style.touchAction='pan-y';
- main.addEventListener('touchstart',e=>{krSwipeStartX=e.changedTouches[0].clientX},{passive:true});
- main.addEventListener('touchend',e=>{if(krSwipeStartX===null)return;const dx=e.changedTouches[0].clientX-krSwipeStartX;krSwipeStartX=null;if(Math.abs(dx)>45)krShowSwipeImage(krSwipeIndex+(dx<0?1:-1));},{passive:true});
- let mouseStart=null;
- main.addEventListener('mousedown',e=>{mouseStart=e.clientX});
- main.addEventListener('mouseup',e=>{if(mouseStart===null)return;const dx=e.clientX-mouseStart;mouseStart=null;if(Math.abs(dx)>45)krShowSwipeImage(krSwipeIndex+(dx<0?1:-1))});
-})();
 async function krOpenDetail(category,id){
  krCurrentCategory=category;
  const d=await krGetData(), c=krAllCategories(d).find(x=>x.id===category)||{title:'รายละเอียด',desc:''};
  const items=(d.items||[]).filter(i=>i.category===category), selected=items.find(i=>i.id===id)||items[0];
- krSetSwipeImages(items.map(i=>({src:i.image,title:i.caption||c.title,description:i.description||c.desc||''})),selected?.image);
  document.getElementById('krDetailTitle').textContent=selected?(selected.caption||c.title):c.title;
  document.getElementById('krDetailDescription').textContent=(selected&&selected.description)||c.desc||'';
  const main=document.getElementById('krDetailImage');main.style.display=selected?'block':'none';if(selected)main.src=selected.image;
@@ -606,15 +485,11 @@ async function krOpenDetail(category,id){
  items.forEach(i=>{
    const fig=document.createElement('figure'), im=document.createElement('img');
    im.src=i.image;im.alt=i.caption||c.title;im.loading='lazy';im.style.cursor='pointer';
-   im.onclick=()=>{main.src=i.image;krSwipeIndex=krSwipeImages.findIndex(x=>x.src===i.image);document.getElementById('krDetailTitle').textContent=i.caption||c.title;document.getElementById('krDetailDescription').textContent=i.description||c.desc||''};
+   im.onclick=()=>{main.src=i.image;document.getElementById('krDetailTitle').textContent=i.caption||c.title;document.getElementById('krDetailDescription').textContent=i.description||c.desc||''};
    const cap=document.createElement('figcaption');cap.textContent=i.caption||c.title;
-   fig.append(im,cap);
-   if(krAdminSession){
-     const del=document.createElement('button');del.className='kr-gallery-delete';del.type='button';del.textContent='ลบรูป';
-     del.onclick=async(ev)=>{ev.stopPropagation();const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(!confirm('ต้องการลบรูปนี้ใช่หรือไม่?'))return;try{await krDeleteItem(i.id);await krAddStoredCards();await krOpenDetail(category,null);}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
-     fig.appendChild(del);
-   }
-   gallery.appendChild(fig);
+   const del=document.createElement('button');del.className='kr-gallery-delete';del.type='button';del.textContent='ลบรูป';
+   del.onclick=async(ev)=>{ev.stopPropagation();const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(!confirm('ต้องการลบรูปนี้ใช่หรือไม่?'))return;try{await krDeleteItem(i.id);await krAddStoredCards();await krOpenDetail(category,null);}catch(err){alert('ลบรูปไม่สำเร็จ: '+err.message)}};
+   fig.append(im,cap,del);gallery.appendChild(fig);
  });
  document.getElementById('krDetail').style.display='flex';
 }
@@ -666,7 +541,7 @@ document.getElementById('krAddForm').addEventListener('submit',async e=>{
      status.textContent='กำลังบันทึก '+(n+1)+'/'+files.length+' รูป...';
    }
    await krAddStoredCards();
-   status.textContent='บันทึกสำเร็จ '+files.length+' รูปแล้ว ข้อมูลซิงก์กับส่วนกลาง';
+   status.textContent='บันทึกสำเร็จ '+files.length+' รูปแล้ว ข้อมูลเก็บในเบราว์เซอร์นี้';
    document.getElementById('krImages').value='';
    document.getElementById('krCaption').value='';
    document.getElementById('krDescription').value='';
@@ -712,21 +587,23 @@ document.querySelectorAll('.card:not(.kr-custom-cards .card)').forEach(card=>{
  const root=document.getElementById('krEstimateSelector');
  if(!root)return;
  const selected={ 'จำนวนรถ':'2 คัน','รูปแบบ':'โมเดิร์น','วัสดุหลังคา':'UPVC' };
- const sendButton=document.getElementById('krSendEstimate');
- const lineButton=document.getElementById('krSendEstimateToLine');
- const status=document.getElementById('krEstimateLineStatus');
- const modal=document.getElementById('krEstimateLineModal');
- const textArea=document.getElementById('krEstimateLineMessage');
- const functionUrl='https://zgjfwzugvlpdanlbucll.supabase.co/functions/v1/kroof-line-estimate';
- function summary(){document.getElementById('krEstimateSummary').textContent='แบบที่เลือก: '+Object.values(selected).join(' • ');}
+ function summary(){
+   const text=Object.entries(selected).map(([k,v])=>k+': '+v).join(' • ');
+   document.getElementById('krEstimateSummary').textContent='แบบที่เลือก: '+Object.values(selected).join(' • ');
+   return text;
+ }
  root.querySelectorAll('.pills[data-choice]').forEach(group=>{
-   group.querySelectorAll('.pill').forEach(btn=>btn.addEventListener('click',()=>{
-     group.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
-     btn.classList.add('active'); selected[group.dataset.choice]=btn.textContent.trim(); summary();
-   }));
+   group.querySelectorAll('.pill').forEach(btn=>{
+     btn.addEventListener('click',()=>{
+       group.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+       btn.classList.add('active');
+       selected[group.dataset.choice]=btn.textContent.trim();
+       summary();
+     });
+   });
  });
  summary();
- sendButton.addEventListener('click',()=>{
+ document.getElementById('krSendEstimate').addEventListener('click',()=>{
    const width=document.getElementById('krWidth').value.trim();
    const length=document.getElementById('krLength').value.trim();
    const name=document.getElementById('krCustomerName').value.trim();
@@ -735,37 +612,42 @@ document.querySelectorAll('.card:not(.kr-custom-cards .card)').forEach(card=>{
    const extra=document.getElementById('krExtra').value.trim();
    if(!width||!length||Number(width)<=0||Number(length)<=0){alert('กรุณากรอกความกว้างและความยาวเป็นเมตร');return}
    if(!name){alert('กรุณากรอกชื่อผู้ติดต่อ');return}
-   window.krEstimatePayload={name,phone,location,extra,carCount:selected['จำนวนรถ'],roofStyle:selected['รูปแบบ'],roofMaterial:selected['วัสดุหลังคา'],width:Number(width),length:Number(length),website:''};
-   textArea.value=[
-     'ขอประเมินราคาโรงจอดรถจากเว็บไซต์ K-Roof','',
-     'จำนวนรถ: '+selected['จำนวนรถ'],'รูปแบบ: '+selected['รูปแบบ'],'วัสดุหลังคา: '+selected['วัสดุหลังคา'],
-     'ขนาด: กว้าง '+width+' ม. × ยาว '+length+' ม.','ชื่อผู้ติดต่อ: '+name,
-     'เบอร์โทรศัพท์: '+(phone||'ยังไม่ได้ระบุ'),'พื้นที่ติดตั้ง: '+(location||'ยังไม่ได้ระบุ'),
-     'รายละเอียดเพิ่มเติม: '+(extra||'ไม่มี'),'',
-     'รบกวนทีมงาน K-Roof ประเมินราคาและแจ้งใบเสนอราคากลับด้วยครับ/ค่ะ'
+   const message=[
+    'ขอประเมินราคาโรงจอดรถจากเว็บไซต์ K-Roof',
+    '',
+    'จำนวนรถ: '+selected['จำนวนรถ'],
+    'รูปแบบ: '+selected['รูปแบบ'],
+    'วัสดุหลังคา: '+selected['วัสดุหลังคา'],
+    'ขนาด: กว้าง '+width+' ม. × ยาว '+length+' ม.',
+    'ชื่อผู้ติดต่อ: '+name,
+    'เบอร์โทรศัพท์: '+(phone||'ยังไม่ได้ระบุ'),
+    'พื้นที่ติดตั้ง: '+(location||'ยังไม่ได้ระบุ'),
+    'รายละเอียดเพิ่มเติม: '+(extra||'ไม่มี'),
+    '',
+    'รบกวนทีมงาน K-Roof ประเมินราคาและแจ้งใบเสนอราคากลับด้วยครับ/ค่ะ'
    ].join('\n');
-   status.textContent='ตรวจสอบข้อมูลแล้ว กดปุ่มสีเขียวเพื่อส่งแบบประเมินเข้า LINE กลุ่มทีมงาน K-Roof';
-   lineButton.disabled=false; lineButton.textContent='ส่งแบบประเมินเข้า LINE'; modal.style.display='flex';
- });
- document.getElementById('krCopyEstimateMessage').onclick=async()=>{
-   textArea.focus();textArea.select();
-   try{await navigator.clipboard.writeText(textArea.value);status.textContent='คัดลอกข้อความแล้ว แต่ยังไม่ได้ส่งเข้า LINE กลุ่ม ให้กดปุ่มสีเขียวเพื่อส่ง';}
-   catch(err){status.textContent='เลือกข้อความในช่องแล้วกด Ctrl+C ได้ หรือกดปุ่มสีเขียวเพื่อส่งเข้า LINE กลุ่ม';}
- };
- lineButton.addEventListener('click',async()=>{
-   const payload=window.krEstimatePayload;
-   if(!payload){status.textContent='กรุณากรอกข้อมูลและกดปุ่มขอประเมินราคาก่อน';return}
-   lineButton.disabled=true;lineButton.textContent='กำลังส่งแบบประเมิน...';status.textContent='กำลังส่งข้อมูลไปยังทีมงาน K-Roof กรุณารอสักครู่';
-   try{
-     const response=await fetch(functionUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_pAaflkfJveRkjM8k07Obuw_iVcQ2bzA'},body:JSON.stringify(payload)});
-     const result=await response.json().catch(()=>({}));
-     if(!response.ok||!result.ok||result.lineSent!==true)throw new Error(result.error||result.message||'ส่งเข้า LINE ไม่สำเร็จ กรุณาลองอีกครั้ง');
-     status.textContent='ส่งแบบประเมินเข้า LINE กลุ่มทีมงาน K-Roof เรียบร้อยแล้ว ทีมงานจะติดต่อกลับ';
-     lineButton.textContent='ส่งแบบประเมินสำเร็จ ✓';textArea.value+='\n\nสถานะ: ส่งเข้า LINE กลุ่มทีมงานแล้ว';
-   }catch(err){
-     console.error('K-Roof estimate send failed:',err);status.textContent=(err&&err.message)||'ส่งไม่สำเร็จ กรุณาตรวจสอบการตั้งค่าแล้วลองใหม่';
-     lineButton.disabled=false;lineButton.textContent='ลองส่งแบบประเมินอีกครั้ง';
-   }
+   const modal=document.getElementById('krEstimateLineModal');
+   const textArea=document.getElementById('krEstimateLineMessage');
+   textArea.value=message;
+   modal.dataset.estimatePayload=JSON.stringify({
+     carCount:selected['จำนวนรถ'], roofStyle:selected['รูปแบบ'], roofMaterial:selected['วัสดุหลังคา'],
+     width:Number(width), length:Number(length), name, phone, location, extra, website:''
+   });
+   const sendButton=document.getElementById('krSendEstimateToLine');
+   sendButton.disabled=false;
+   sendButton.textContent='ส่งแบบประเมินเข้า LINE';
+   sendButton.style.opacity='1';
+   document.getElementById('krEstimateLineStatus').textContent='ตรวจสอบรายละเอียด แล้วกด “ส่งแบบประเมินเข้า LINE” ระบบจะส่งข้อมูลให้กลุ่มทีมงาน K-Roof อัตโนมัติ';
+   modal.style.display='flex';
+   document.getElementById('krCopyEstimateMessage').onclick=async()=>{
+     textArea.focus();textArea.select();
+     try{
+       await navigator.clipboard.writeText(message);
+       document.getElementById('krEstimateLineStatus').textContent='คัดลอกข้อความแล้ว ให้กด “เปิด LINE K-Roof” แล้ววางข้อความในแชต';
+     }catch(err){
+       document.getElementById('krEstimateLineStatus').textContent='เลือกข้อความในช่องแล้วกด Ctrl+C จากนั้นเปิด LINE แล้ววางข้อความ';
+     }
+   };
  });
 })();
 </script>
@@ -784,20 +666,9 @@ async function krGetStaticCards(){
  return out;
 }
 async function krGetCardOverrides(){
- const d=await krGetData();
- if(d.cardOverrides && Object.keys(d.cardOverrides).length) return d.cardOverrides;
  const x=await krTx('meta','readonly',s=>s.get('cardOverrides'));return x?.value||{};
 }
-async function krSaveCardOverrides(value){
- const d=await krGetData(), next={...(value||{})};
- for(const [id,ov0] of Object.entries(next)){
-   const ov={...ov0};
-   if(ov.cover) ov.cover=await krUploadDataUrl(ov.cover,'card-covers/'+id);
-   next[id]=ov;
- }
- d.cardOverrides=next;
- await krPersistRemoteData(d);
-}
+async function krSaveCardOverrides(value){await krTx('meta','readwrite',s=>s.put({key:'cardOverrides',value}));}
 async function krRenderStaticCardOverrides(){
  const [cards,all]=await Promise.all([krGetStaticCards(),krGetCardOverrides()]);
  cards.forEach(c=>{const ov=all[c.id];if(!ov)return;const title=c.card.querySelector('.card-body b,.card-body h3');if(title)title.textContent=ov.title||c.title;const img=c.card.querySelector('img');if(img&&ov.cover)img.src=ov.cover;});
@@ -848,10 +719,8 @@ async function krOpenCardDetail(id){
  document.getElementById('krDetailDescription').textContent=ov.description||'';
  const main=document.getElementById('krDetailImage'),base=card.card.querySelector('img');
  main.src=ov.cover||(base?base.src:'');main.style.display='block';
- const coverSrc=ov.cover||(base?base.src:'');
- krSetSwipeImages([{src:coverSrc,title:ov.title||card.title,description:ov.description||''},...items.map(item=>({src:item.image,title:item.caption||ov.title||card.title,description:item.description||ov.description||''}))],coverSrc);
  const gallery=document.getElementById('krDetailGallery');gallery.innerHTML='';
- items.forEach(item=>{const fig=document.createElement('figure'),im=document.createElement('img');im.src=item.image;im.alt=item.caption||'';im.onclick=()=>{main.src=item.image;krSwipeIndex=krSwipeImages.findIndex(x=>x.src===item.image)};const cap=document.createElement('figcaption');cap.textContent=item.caption||'';fig.append(im,cap);if(krAdminSession){const del=document.createElement('button');del.className='kr-gallery-delete';del.textContent='ลบรูป';del.onclick=async()=>{const auth=await krCheckAdmin();if(!auth.ok){krShowAdminLogin(auth.message);return}if(confirm('ลบรูปนี้หรือไม่?')){await krDeleteItem(item.id);await krOpenCardDetail(id)}};fig.appendChild(del)}gallery.appendChild(fig)});
+ items.forEach(item=>{const fig=document.createElement('figure'),im=document.createElement('img');im.src=item.image;im.alt=item.caption||'';im.onclick=()=>{main.src=item.image};const cap=document.createElement('figcaption');cap.textContent=item.caption||'';const del=document.createElement('button');del.className='kr-gallery-delete';del.textContent='ลบรูป';del.onclick=async()=>{if(confirm('ลบรูปนี้หรือไม่?')){await krDeleteItem(item.id);await krOpenCardDetail(id)}};fig.append(im,cap,del);gallery.appendChild(fig)});
  document.getElementById('krDetail').style.display='flex';
 }
 document.getElementById('krCardTarget')?.addEventListener('change',krLoadCardEditor);
@@ -869,79 +738,41 @@ document.addEventListener('click',async function(e){
  <div style="background:#fff;border-radius:16px;padding:22px;max-width:620px;width:100%;max-height:90vh;overflow:auto;position:relative">
   <button type="button" onclick="document.getElementById('krEstimateLineModal').style.display='none'" aria-label="ปิด" style="position:absolute;right:12px;top:10px;border:0;border-radius:50%;width:36px;height:36px;font-size:22px;cursor:pointer">×</button>
   <h2 id="krEstimateLineTitle" style="margin:0 40px 8px 0">ข้อความขอประเมินราคา</h2>
-  <p style="color:#59636e;font-size:14px">ตรวจสอบแบบประเมินด้านล่าง แล้วกดปุ่มสีเขียวเพื่อส่งข้อมูลเข้า LINE กลุ่มทีมงาน K-Roof โดยตรง</p>
+  <p style="color:#59636e;font-size:14px">ตรวจสอบข้อความด้านล่าง กดคัดลอก แล้วเปิด LINE เพื่อวางข้อความส่งให้ K-Roof</p>
   <textarea id="krEstimateLineMessage" rows="12" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #d6dce2;border-radius:9px;font:14px/1.6 sans-serif"></textarea>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
    <button type="button" id="krCopyEstimateMessage" style="background:#111;color:#fff;border:0;border-radius:9px;padding:12px 16px;font-weight:bold;cursor:pointer">คัดลอกข้อความ</button>
    <button type="button" id="krSendEstimateToLine" style="background:#06b956;color:#fff;border:0;border-radius:9px;padding:12px 16px;font-weight:bold;cursor:pointer">ส่งแบบประเมินเข้า LINE</button>
   </div>
-  <p id="krEstimateLineStatus" style="font-size:13px;color:#52606d;margin-bottom:0">ขั้นตอน: ตรวจสอบข้อมูล → กด “ส่งแบบประเมินเข้า LINE” → รอผลยืนยัน</p>
+  <p id="krEstimateLineStatus" aria-live="polite" style="font-size:13px;color:#52606d;margin-bottom:0">ตรวจสอบรายละเอียด แล้วกดส่งแบบประเมินเข้า LINE ระบบจะส่งข้อมูลให้กลุ่มทีมงาน K-Roof อัตโนมัติ</p>
  </div>
 </div>
 
-
-<footer id="krAdminAccessFooter" style="background:#111820;color:#fff;padding:24px 16px;text-align:center;margin-top:32px">
- <p style="margin:0 0 12px;font-size:13px;color:#cbd1d8">พื้นที่ผู้ดูแลเว็บไซต์ K-Roof</p>
- <button id="krAdminAccessButton" type="button" onclick="krHandleAdminAccessButton()" style="background:#d71920;color:#fff;border:0;border-radius:10px;padding:12px 22px;font-weight:800;font-size:14px;cursor:pointer">เข้าสู่ระบบผู้ดูแล</button>
- <p id="krAdminAccessStatus" aria-live="polite" style="margin:10px 0 0;font-size:12px;color:#cbd1d8"></p>
-</footer>
 <script>
-function krUpdateAdminAccessButton(isAdmin){
- const button=document.getElementById('krAdminAccessButton');
- const status=document.getElementById('krAdminAccessStatus');
- const addPhotoButton=document.getElementById('krAddPhotoInDetail');
+// ส่งแบบประเมินที่กรอกไว้จากเว็บไซต์ไปยัง Supabase Edge Function แล้วให้ LINE OA แจ้งกลุ่มทีมงาน
+(function(){
+ const button=document.getElementById('krSendEstimateToLine');
  if(!button)return;
- button.textContent=isAdmin?'ออกจากระบบผู้ดูแล':'เข้าสู่ระบบผู้ดูแล';
- button.setAttribute('aria-label',button.textContent);
- if(status)status.textContent=isAdmin?'เข้าสู่ระบบผู้ดูแลแล้ว':'สำหรับเจ้าของร้านเท่านั้น';
- // ซ่อนปุ่มเพิ่มรูปจากผู้เข้าชมทั่วไป และแสดงเฉพาะเมื่อยืนยันสิทธิ์ Admin แล้ว
- if(addPhotoButton)addPhotoButton.style.display=isAdmin?'inline-block':'none';
-}
-async function krHandleAdminAccessButton(){
- const button=document.getElementById('krAdminAccessButton');
- if(button)button.disabled=true;
- try{
-  const client=krSupabaseClient();
-  const sessionResult=client?await client.auth.getSession():null;
-  const session=sessionResult?.data?.session;
-  if(session){
-   const check=await krCheckAdmin();
-   if(check.ok){await krAdminLogout();krUpdateAdminAccessButton(false);return;}
-   if(client)await client.auth.signOut();
-   krAdminSession=null;krUpdateAdminAccessButton(false);
-  }
-  await krOpenManage();
- }catch(err){
-  const status=document.getElementById('krAdminAccessStatus');
-  if(status)status.textContent='ดำเนินการไม่สำเร็จ: '+(err.message||'กรุณาลองใหม่');
- }finally{if(button)button.disabled=false;}
-}
-async function krOpenManageFromContent(){
- const client=krSupabaseClient();
- const sessionResult=client?await client.auth.getSession():null;
- const session=sessionResult?.data?.session;
- if(!session){
-  const status=document.getElementById('krAdminAccessStatus');
-  if(status)status.textContent='กรุณาเข้าสู่ระบบจากปุ่มด้านล่างของเว็บไซต์ก่อน';
-  document.getElementById('krAdminAccessFooter')?.scrollIntoView({behavior:'smooth',block:'end'});
-  return;
- }
- return krOpenManage();
-}
-(async()=>{
- try{
-  const client=krSupabaseClient();
-  if(!client){krUpdateAdminAccessButton(false);return;}
-  const {data:{session}}=await client.auth.getSession();
-  if(!session){krUpdateAdminAccessButton(false);return;}
-  const check=await krCheckAdmin();
-  if(check.ok)krUpdateAdminAccessButton(true);
-  else{await client.auth.signOut();krUpdateAdminAccessButton(false);}
-  client.auth.onAuthStateChange((_event,sessionNow)=>{
-   if(!sessionNow)krUpdateAdminAccessButton(false);
-   else setTimeout(async()=>{try{const c=await krCheckAdmin();krUpdateAdminAccessButton(!!c.ok);}catch(_){krUpdateAdminAccessButton(false);}},0);
-  });
- }catch(err){console.warn('Admin access button:',err);krUpdateAdminAccessButton(false);}
+ button.addEventListener('click',async()=>{
+  const modal=document.getElementById('krEstimateLineModal');
+  const status=document.getElementById('krEstimateLineStatus');
+  let payload;
+  try{payload=JSON.parse(modal.dataset.estimatePayload||'null')}catch(_e){payload=null}
+  if(!payload){status.textContent='ไม่พบข้อมูลแบบประเมิน กรุณาปิดหน้าต่างแล้วกดขอประเมินราคาใหม่';status.style.color='#b42318';return}
+  const cfg=window.KROOF_SUPABASE_CONFIG;
+  if(!cfg?.url||!cfg?.anonKey){status.textContent='ระบบยังไม่ได้ตั้งค่า Supabase กรุณาติดต่อร้าน';status.style.color='#b42318';return}
+  button.disabled=true;button.style.opacity='.65';button.textContent='กำลังส่งแบบประเมิน…';
+  status.textContent='กำลังส่งข้อมูลแบบประเมินไปยังกลุ่ม LINE ทีมงาน K-Roof…';status.style.color='#52606d';
+  try{
+   const response=await fetch(cfg.url.replace(/\/$/,'')+'/functions/v1/kroof-line-estimate',{
+    method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey},body:JSON.stringify(payload)
+   });
+   let result={};try{result=await response.json()}catch(_e){}
+   if(!response.ok)throw new Error(result.error||'ส่งแบบประเมินไม่สำเร็จ');
+   if(result.lineSent===false){status.textContent='บันทึกแบบประเมินแล้ว แต่ LINE ส่งไม่สำเร็จ กรุณาติดต่อร้าน';status.style.color='#b42318';button.disabled=false;button.textContent='ลองส่งอีกครั้ง';button.style.opacity='1';return}
+   status.textContent='ส่งแบบประเมินเรียบร้อยแล้ว ทีมงาน K-Roof จะได้รับข้อมูลในกลุ่ม LINE';status.style.color='#15803d';button.textContent='ส่งแบบประเมินแล้ว';
+  }catch(err){status.textContent=(err?.message||'เกิดข้อผิดพลาด')+' — กรุณาลองใหม่อีกครั้ง';status.style.color='#b42318';button.disabled=false;button.textContent='ลองส่งอีกครั้ง';button.style.opacity='1';}
+ });
 })();
 </script>
 
