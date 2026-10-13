@@ -84,8 +84,9 @@ h1{font-size:clamp(48px,5.2vw,82px);line-height:1.04;letter-spacing:-1.5px}
 
 /* Admin-only controls must remain hidden until Supabase confirms an authorized admin session. */
 body:not(.kr-admin-authenticated) .kr-auth-logout,
+body:not(.kr-admin-authenticated) .kr-auth-login { display:inline-flex !important; }
 body:not(.kr-admin-authenticated) .manage-fab,
-body:not(.kr-admin-authenticated) button[onclick*="krOpenManage"],
+body:not(.kr-admin-authenticated) button[onclick*="krOpenManage"]:not(.kr-auth-login),
 body:not(.kr-admin-authenticated) button[onclick*="krCloseManage"],
 body.kr-admin-authenticated .kr-auth-login,
 body:not(.kr-admin-authenticated) .kr-delete-btn,
