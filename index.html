@@ -712,23 +712,21 @@ document.querySelectorAll('.card:not(.kr-custom-cards .card)').forEach(card=>{
  const root=document.getElementById('krEstimateSelector');
  if(!root)return;
  const selected={ 'จำนวนรถ':'2 คัน','รูปแบบ':'โมเดิร์น','วัสดุหลังคา':'UPVC' };
- function summary(){
-   const text=Object.entries(selected).map(([k,v])=>k+': '+v).join(' • ');
-   document.getElementById('krEstimateSummary').textContent='แบบที่เลือก: '+Object.values(selected).join(' • ');
-   return text;
- }
+ const sendButton=document.getElementById('krSendEstimate');
+ const lineButton=document.getElementById('krSendEstimateToLine');
+ const status=document.getElementById('krEstimateLineStatus');
+ const modal=document.getElementById('krEstimateLineModal');
+ const textArea=document.getElementById('krEstimateLineMessage');
+ const functionUrl='https://zgjfwzugvlpdanlbucll.supabase.co/functions/v1/kroof-line-estimate';
+ function summary(){document.getElementById('krEstimateSummary').textContent='แบบที่เลือก: '+Object.values(selected).join(' • ');}
  root.querySelectorAll('.pills[data-choice]').forEach(group=>{
-   group.querySelectorAll('.pill').forEach(btn=>{
-     btn.addEventListener('click',()=>{
-       group.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
-       btn.classList.add('active');
-       selected[group.dataset.choice]=btn.textContent.trim();
-       summary();
-     });
-   });
+   group.querySelectorAll('.pill').forEach(btn=>btn.addEventListener('click',()=>{
+     group.querySelectorAll('.pill').forEach(b=>b.classList.remove('active'));
+     btn.classList.add('active'); selected[group.dataset.choice]=btn.textContent.trim(); summary();
+   }));
  });
  summary();
- document.getElementById('krSendEstimate').addEventListener('click',()=>{
+ sendButton.addEventListener('click',()=>{
    const width=document.getElementById('krWidth').value.trim();
    const length=document.getElementById('krLength').value.trim();
    const name=document.getElementById('krCustomerName').value.trim();
@@ -737,34 +735,37 @@ document.querySelectorAll('.card:not(.kr-custom-cards .card)').forEach(card=>{
    const extra=document.getElementById('krExtra').value.trim();
    if(!width||!length||Number(width)<=0||Number(length)<=0){alert('กรุณากรอกความกว้างและความยาวเป็นเมตร');return}
    if(!name){alert('กรุณากรอกชื่อผู้ติดต่อ');return}
-   const message=[
-    'ขอประเมินราคาโรงจอดรถจากเว็บไซต์ K-Roof',
-    '',
-    'จำนวนรถ: '+selected['จำนวนรถ'],
-    'รูปแบบ: '+selected['รูปแบบ'],
-    'วัสดุหลังคา: '+selected['วัสดุหลังคา'],
-    'ขนาด: กว้าง '+width+' ม. × ยาว '+length+' ม.',
-    'ชื่อผู้ติดต่อ: '+name,
-    'เบอร์โทรศัพท์: '+(phone||'ยังไม่ได้ระบุ'),
-    'พื้นที่ติดตั้ง: '+(location||'ยังไม่ได้ระบุ'),
-    'รายละเอียดเพิ่มเติม: '+(extra||'ไม่มี'),
-    '',
-    'รบกวนทีมงาน K-Roof ประเมินราคาและแจ้งใบเสนอราคากลับด้วยครับ/ค่ะ'
+   window.krEstimatePayload={name,phone,location,extra,carCount:selected['จำนวนรถ'],roofStyle:selected['รูปแบบ'],roofMaterial:selected['วัสดุหลังคา'],width:Number(width),length:Number(length),website:''};
+   textArea.value=[
+     'ขอประเมินราคาโรงจอดรถจากเว็บไซต์ K-Roof','',
+     'จำนวนรถ: '+selected['จำนวนรถ'],'รูปแบบ: '+selected['รูปแบบ'],'วัสดุหลังคา: '+selected['วัสดุหลังคา'],
+     'ขนาด: กว้าง '+width+' ม. × ยาว '+length+' ม.','ชื่อผู้ติดต่อ: '+name,
+     'เบอร์โทรศัพท์: '+(phone||'ยังไม่ได้ระบุ'),'พื้นที่ติดตั้ง: '+(location||'ยังไม่ได้ระบุ'),
+     'รายละเอียดเพิ่มเติม: '+(extra||'ไม่มี'),'',
+     'รบกวนทีมงาน K-Roof ประเมินราคาและแจ้งใบเสนอราคากลับด้วยครับ/ค่ะ'
    ].join('\n');
-   const modal=document.getElementById('krEstimateLineModal');
-   const textArea=document.getElementById('krEstimateLineMessage');
-   textArea.value=message;
-   document.getElementById('krEstimateLineStatus').textContent='ขั้นตอน: คัดลอกข้อความ → เปิด LINE → วางในแชต → กดส่ง';
-   modal.style.display='flex';
-   document.getElementById('krCopyEstimateMessage').onclick=async()=>{
-     textArea.focus();textArea.select();
-     try{
-       await navigator.clipboard.writeText(message);
-       document.getElementById('krEstimateLineStatus').textContent='คัดลอกข้อความแล้ว ให้กด “เปิด LINE K-Roof” แล้ววางข้อความในแชต';
-     }catch(err){
-       document.getElementById('krEstimateLineStatus').textContent='เลือกข้อความในช่องแล้วกด Ctrl+C จากนั้นเปิด LINE แล้ววางข้อความ';
-     }
-   };
+   status.textContent='ตรวจสอบข้อมูลแล้ว กดปุ่มสีเขียวเพื่อส่งแบบประเมินเข้า LINE กลุ่มทีมงาน K-Roof';
+   lineButton.disabled=false; lineButton.textContent='ส่งแบบประเมินเข้า LINE'; modal.style.display='flex';
+ });
+ document.getElementById('krCopyEstimateMessage').onclick=async()=>{
+   textArea.focus();textArea.select();
+   try{await navigator.clipboard.writeText(textArea.value);status.textContent='คัดลอกข้อความแล้ว แต่ยังไม่ได้ส่งเข้า LINE กลุ่ม ให้กดปุ่มสีเขียวเพื่อส่ง';}
+   catch(err){status.textContent='เลือกข้อความในช่องแล้วกด Ctrl+C ได้ หรือกดปุ่มสีเขียวเพื่อส่งเข้า LINE กลุ่ม';}
+ };
+ lineButton.addEventListener('click',async()=>{
+   const payload=window.krEstimatePayload;
+   if(!payload){status.textContent='กรุณากรอกข้อมูลและกดปุ่มขอประเมินราคาก่อน';return}
+   lineButton.disabled=true;lineButton.textContent='กำลังส่งแบบประเมิน...';status.textContent='กำลังส่งข้อมูลไปยังทีมงาน K-Roof กรุณารอสักครู่';
+   try{
+     const response=await fetch(functionUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_pAaflkfJveRkjM8k07Obuw_iVcQ2bzA'},body:JSON.stringify(payload)});
+     const result=await response.json().catch(()=>({}));
+     if(!response.ok||!result.ok||result.lineSent!==true)throw new Error(result.error||result.message||'ส่งเข้า LINE ไม่สำเร็จ กรุณาลองอีกครั้ง');
+     status.textContent='ส่งแบบประเมินเข้า LINE กลุ่มทีมงาน K-Roof เรียบร้อยแล้ว ทีมงานจะติดต่อกลับ';
+     lineButton.textContent='ส่งแบบประเมินสำเร็จ ✓';textArea.value+='\n\nสถานะ: ส่งเข้า LINE กลุ่มทีมงานแล้ว';
+   }catch(err){
+     console.error('K-Roof estimate send failed:',err);status.textContent=(err&&err.message)||'ส่งไม่สำเร็จ กรุณาตรวจสอบการตั้งค่าแล้วลองใหม่';
+     lineButton.disabled=false;lineButton.textContent='ลองส่งแบบประเมินอีกครั้ง';
+   }
  });
 })();
 </script>
@@ -868,13 +869,13 @@ document.addEventListener('click',async function(e){
  <div style="background:#fff;border-radius:16px;padding:22px;max-width:620px;width:100%;max-height:90vh;overflow:auto;position:relative">
   <button type="button" onclick="document.getElementById('krEstimateLineModal').style.display='none'" aria-label="ปิด" style="position:absolute;right:12px;top:10px;border:0;border-radius:50%;width:36px;height:36px;font-size:22px;cursor:pointer">×</button>
   <h2 id="krEstimateLineTitle" style="margin:0 40px 8px 0">ข้อความขอประเมินราคา</h2>
-  <p style="color:#59636e;font-size:14px">ตรวจสอบข้อความด้านล่าง กดคัดลอก แล้วเปิด LINE เพื่อวางข้อความส่งให้ K-Roof</p>
+  <p style="color:#59636e;font-size:14px">ตรวจสอบแบบประเมินด้านล่าง แล้วกดปุ่มสีเขียวเพื่อส่งข้อมูลเข้า LINE กลุ่มทีมงาน K-Roof โดยตรง</p>
   <textarea id="krEstimateLineMessage" rows="12" style="width:100%;box-sizing:border-box;padding:12px;border:1px solid #d6dce2;border-radius:9px;font:14px/1.6 sans-serif"></textarea>
   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
    <button type="button" id="krCopyEstimateMessage" style="background:#111;color:#fff;border:0;border-radius:9px;padding:12px 16px;font-weight:bold;cursor:pointer">คัดลอกข้อความ</button>
-   <button type="button" onclick="window.open('https://lin.ee/Yz2WhXb','_blank','noopener')" style="background:#06b956;color:#fff;border:0;border-radius:9px;padding:12px 16px;font-weight:bold;cursor:pointer">เปิด LINE K-Roof</button>
+   <button type="button" id="krSendEstimateToLine" style="background:#06b956;color:#fff;border:0;border-radius:9px;padding:12px 16px;font-weight:bold;cursor:pointer">ส่งแบบประเมินเข้า LINE</button>
   </div>
-  <p id="krEstimateLineStatus" style="font-size:13px;color:#52606d;margin-bottom:0">ขั้นตอน: คัดลอกข้อความ → เปิด LINE → วางในแชต → กดส่ง</p>
+  <p id="krEstimateLineStatus" style="font-size:13px;color:#52606d;margin-bottom:0">ขั้นตอน: ตรวจสอบข้อมูล → กด “ส่งแบบประเมินเข้า LINE” → รอผลยืนยัน</p>
  </div>
 </div>
 
