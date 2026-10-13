@@ -396,29 +396,60 @@ function krTx(store,mode,operation){
    tx.onabort=()=>reject(tx.error||new Error('บันทึกข้อมูลไม่สำเร็จ'));
  }));
 }
+// Cloud sync: shared gallery data and images live in Supabase, not only in this browser.
+let krCloudCache=null, krCloudBusy=false;
+async function krCloudClient(){return krSupabaseClient();}
+async function krCloudImage(value, path){
+ if(typeof value!=='string'||!value.startsWith('data:image/')) return value;
+ const client=await krCloudClient(); if(!client) throw new Error('Supabase ยังไม่พร้อม');
+ const res=await fetch(value), blob=await res.blob();
+ const ext=(blob.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/[^a-z0-9]/gi,'');
+ const filePath=(path||'image')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)+'.'+ext;
+ const up=await client.storage.from('kroof-site-images').upload(filePath,blob,{contentType:blob.type,upsert:true});
+ if(up.error) throw up.error;
+ return client.storage.from('kroof-site-images').getPublicUrl(filePath).data.publicUrl;
+}
+async function krCloudNormalize(data){
+ const out=JSON.parse(JSON.stringify(data));
+ for(const [k,v] of Object.entries(out.covers||{})) out.covers[k]=await krCloudImage(v,'cover-'+k);
+ for(let i=0;i<(out.items||[]).length;i++) out.items[i].image=await krCloudImage(out.items[i].image,'gallery-'+out.items[i].id);
+ for(const [k,v] of Object.entries(out.cardOverrides||{})) if(v?.cover) out.cardOverrides[k].cover=await krCloudImage(v.cover,'card-'+k);
+ return out;
+}
+async function krCloudRead(){
+ const client=await krCloudClient(); if(!client) return null;
+ const {data,error}=await client.from('kroof_site_data').select('data').eq('id','main').maybeSingle();
+ if(error) throw error; return data?.data||null;
+}
+async function krCloudWrite(){
+ if(krCloudBusy) return; const client=await krCloudClient(); if(!client) throw new Error('ไม่พบการตั้งค่า Supabase');
+ krCloudBusy=true;
+ try{
+  const [meta,items,ov]=await Promise.all([krTx('meta','readonly',s=>s.get('gallery')),krTx('items','readonly',s=>s.getAll()),krTx('meta','readonly',s=>s.get('cardOverrides'))]);
+  const normalized=await krCloudNormalize({categories:meta?.categories||[],covers:meta?.covers||{},items:items||[],cardOverrides:ov?.value||{}});
+  const {error}=await client.from('kroof_site_data').upsert({id:'main',data:normalized,updated_at:new Date().toISOString()},{onConflict:'id'});
+  if(error) throw error; krCloudCache=normalized;
+  // Replace local data URLs with shared public URLs so this device also uses cloud images.
+  await krTx('meta','readwrite',st=>st.put({key:'gallery',categories:normalized.categories,covers:normalized.covers}));
+  await krTx('meta','readwrite',st=>st.put({key:'cardOverrides',value:normalized.cardOverrides||{}}));
+  const db=await krOpenDB(); await new Promise((resolve,reject)=>{const tx=db.transaction('items','readwrite'),st=tx.objectStore('items');st.clear();normalized.items.forEach(it=>st.put(it));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+ } finally {krCloudBusy=false;}
+}
+async function krApplyCloud(data){
+ const db=await krOpenDB();
+ await new Promise((resolve,reject)=>{const tx=db.transaction(['meta','items'],'readwrite');tx.objectStore('meta').put({key:'gallery',categories:data.categories||[],covers:data.covers||{}});tx.objectStore('meta').put({key:'cardOverrides',value:data.cardOverrides||{}});const st=tx.objectStore('items');st.clear();(data.items||[]).forEach(it=>st.put(it));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});
+ krCloudCache=data;
+}
 async function krGetData(){
- const [meta,items]=await Promise.all([
-   krTx('meta','readonly',s=>s.get('gallery')),
-   krTx('items','readonly',s=>s.getAll())
- ]);
+ try{const cloud=await krCloudRead();if(cloud){await krApplyCloud(cloud);return {categories:cloud.categories||[],covers:cloud.covers||{},items:cloud.items||[]};}}catch(e){console.warn('Supabase gallery read:',e.message)}
+ const [meta,items]=await Promise.all([krTx('meta','readonly',s=>s.get('gallery')),krTx('items','readonly',s=>s.getAll())]);
  return {categories:meta?.categories||[],covers:meta?.covers||{},items:items||[]};
 }
-async function krSaveCategories(categories){
- const old=await krTx('meta','readonly',s=>s.get('gallery'));
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories,covers:old?.covers||{}}));
-}
-async function krSaveCover(category,dataUrl){
- const old=await krTx('meta','readonly',s=>s.get('gallery'));
- const covers={...(old?.covers||{})};covers[category]=dataUrl;
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
-}
-async function krDeleteCover(category){
- const old=await krTx('meta','readonly',s=>s.get('gallery'));
- const covers={...(old?.covers||{})};delete covers[category];
- await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));
-}
-async function krSaveItem(item){ await krTx('items','readwrite',s=>s.put(item)); }
-async function krDeleteItem(id){ await krTx('items','readwrite',s=>s.delete(id)); }
+async function krSaveCategories(categories){const old=await krTx('meta','readonly',s=>s.get('gallery'));await krTx('meta','readwrite',s=>s.put({key:'gallery',categories,covers:old?.covers||{}}));await krCloudWrite();}
+async function krSaveCover(category,dataUrl){const old=await krTx('meta','readonly',s=>s.get('gallery'));const covers={...(old?.covers||{})};covers[category]=dataUrl;await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));await krCloudWrite();}
+async function krDeleteCover(category){const old=await krTx('meta','readonly',s=>s.get('gallery'));const covers={...(old?.covers||{})};delete covers[category];await krTx('meta','readwrite',s=>s.put({key:'gallery',categories:old?.categories||[],covers}));await krCloudWrite();}
+async function krSaveItem(item){await krTx('items','readwrite',s=>s.put(item));await krCloudWrite();}
+async function krDeleteItem(id){await krTx('items','readwrite',s=>s.delete(id));await krCloudWrite();}
 function krAllCategories(d){return krDefaultCategories.concat(d.categories||[])}
 async function krRefreshCategorySelect(){
  const sel=document.getElementById('krCategory'), d=await krGetData();
@@ -794,9 +825,10 @@ async function krGetStaticCards(){
  return out;
 }
 async function krGetCardOverrides(){
+ try{const cloud=await krCloudRead();if(cloud){await krApplyCloud(cloud);return cloud.cardOverrides||{};}}catch(e){console.warn('Supabase card data read:',e.message)}
  const x=await krTx('meta','readonly',s=>s.get('cardOverrides'));return x?.value||{};
 }
-async function krSaveCardOverrides(value){await krTx('meta','readwrite',s=>s.put({key:'cardOverrides',value}));}
+async function krSaveCardOverrides(value){await krTx('meta','readwrite',s=>s.put({key:'cardOverrides',value}));await krCloudWrite();}
 async function krRenderStaticCardOverrides(){
  const [cards,all]=await Promise.all([krGetStaticCards(),krGetCardOverrides()]);
  cards.forEach(c=>{const ov=all[c.id];if(!ov)return;const title=c.card.querySelector('.card-body b,.card-body h3');if(title)title.textContent=ov.title||c.title;const img=c.card.querySelector('img');if(img&&ov.cover)img.src=ov.cover;});
