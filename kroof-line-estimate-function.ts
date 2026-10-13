@@ -3,7 +3,7 @@
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const LINE_CHANNEL_ACCESS_TOKEN = Deno.env.get('LINE_CHANNEL_ACCESS_TOKEN') ?? '';
-const LINE_TARGET_ID = Deno.env.get('LINE_TARGET_ID') ?? '';
+const LINE_TARGET_ID = Deno.env.get('LINE_TARGET_ID') ?? Deno.env.get('LINE_GROUP_ID') ?? '';
 const ALLOWED_ORIGINS = new Set([
   'https://sarawut0909.github.io',
   'https://หลังคาเครูฟ.com',
