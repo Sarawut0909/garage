@@ -21,9 +21,9 @@ h1{font-size:clamp(40px,6vw,70px);line-height:.98;margin:0 0 18px;font-weight:10
 .red{background:var(--red);color:#fff}.white{background:#fff;color:#111}.green{background:var(--green);color:#fff}
 .section{padding:58px 0}.alt{background:var(--cream)}.heading{text-align:center;margin-bottom:28px}
 .heading h2{font-size:clamp(27px,4vw,42px);margin:0 0 7px;font-weight:1000}.heading p{margin:0;color:var(--muted)}
-.grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.grid6{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
 .card{background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:0 8px 25px rgba(20,20,20,.06);transition:.2s}
-.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(20,20,20,.12)}.card img{width:100%;height:115px;object-fit:cover;display:block}
+.card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(20,20,20,.12)}.card img{width:100%;height:auto;aspect-ratio:4/3;object-fit:contain;display:block;background:#f3f4f6}
 .card-body{padding:12px}.card-body b{display:block;font-size:14px;margin-bottom:8px}.card-body span{display:inline-block;background:#111;color:#fff;border-radius:999px;padding:5px 11px;font-size:11px}
 .dark{background:#10161d;color:#fff}.dark .heading p{color:#b8c0c8}.dark .card{background:#18212b;border-color:#26313c;color:#fff}.dark .card-body span{background:var(--red)}
 .selector{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;max-width:1050px;margin:auto}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px}.panel h3{margin:0 0 16px}
@@ -32,8 +32,58 @@ h1{font-size:clamp(40px,6vw,70px);line-height:.98;margin:0 0 18px;font-weight:10
 .cta{background:linear-gradient(100deg,#151b22,#2a3138);color:#fff;border-radius:28px;padding:38px;display:flex;align-items:center;justify-content:space-between;gap:24px}.cta h2{font-size:34px;margin:0 0 8px}.cta p{margin:0;color:#cbd0d6}
 footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:30px}.small{font-size:13px;color:#b9c0c7;line-height:1.7}
 .floating{position:fixed;right:16px;bottom:16px;z-index:30;display:flex;gap:8px}.floating a{box-shadow:0 8px 25px rgba(0,0,0,.2)}
-@media(max-width:900px){.nav{display:none}.grid6{grid-template-columns:repeat(3,1fr)}.grid5{grid-template-columns:repeat(2,1fr)}.selector{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,1fr)}.hero{min-height:600px}}
-@media(max-width:560px){.container{width:calc(100% - 22px)}.contact{display:none}.hero-content{padding:60px 0}h1{font-size:42px}.hero p{font-size:15px}.grid6{grid-template-columns:repeat(2,1fr);gap:9px}.grid5{gap:9px}.card img{height:100px}.card-body{padding:9px}.card-body b{font-size:12px}.cta{padding:26px;display:block}.cta h2{font-size:28px}.steps{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr}}
+@media(max-width:900px){.nav{display:none}.grid6{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.grid5{grid-template-columns:repeat(2,1fr)}.selector{grid-template-columns:1fr}.steps{grid-template-columns:repeat(2,1fr)}.hero{min-height:600px}}
+@media(max-width:560px){.container{width:calc(100% - 22px)}.contact{display:none}.hero-content{padding:60px 0}h1{font-size:42px}.hero p{font-size:15px}.grid6{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid5{gap:9px}.card img{height:100px}.card-body{padding:9px}.card-body b{font-size:12px}.cta{padding:26px;display:block}.cta h2{font-size:28px}.steps{grid-template-columns:1fr 1fr}.footer-grid{grid-template-columns:1fr}}
+</style>
+
+
+<style>
+/* K-Roof: improve desktop proportions and readability */
+.container{width:min(1440px,calc(100% - 56px))}
+.topbar{height:78px}
+.logo{font-size:25px;gap:12px}
+.logo-mark{width:44px;height:44px;font-size:23px}
+.logo small{font-size:11px!important}
+.nav{gap:26px;font-size:16px}
+.contact{font-size:17px;line-height:1.45}
+.hero{min-height:620px;background-position:center}
+.hero-content{max-width:760px;padding:94px 0}
+.eyebrow{font-size:14px;padding:9px 15px}
+h1{font-size:clamp(48px,5.2vw,82px);line-height:1.04;letter-spacing:-1.5px}
+.hero p{font-size:21px;max-width:720px}
+.btn{padding:15px 23px;font-size:16px}
+.section{padding:76px 0}
+.heading{margin-bottom:36px}
+.heading h2{font-size:clamp(32px,3.1vw,48px)}
+.heading p{font-size:16px}
+.grid6{gap:16px}
+.grid5{gap:18px}
+.card{border-radius:17px}
+.card img{height:170px}
+.card-body{padding:16px}
+.card-body b{font-size:17px}
+.card-body span{font-size:13px;padding:6px 12px}
+.panel{padding:26px}
+.panel h3{font-size:22px}
+.pill{font-size:15px;padding:11px 15px}
+.steps{gap:18px}
+.step{padding:24px}
+.step h3{font-size:18px}
+.step p{font-size:15px}
+.cta{padding:40px}
+.cta h2{font-size:clamp(30px,3vw,44px)}
+.cta p{font-size:18px}
+.floating .btn{padding:15px 22px}
+/* Keep the content management button separate from the restored login controls */
+.manage-fab{left:16px;bottom:78px;padding:12px 16px;font-size:14px}
+.kr-auth-bottom{position:fixed;left:16px;bottom:14px;z-index:1100;display:flex;gap:8px;align-items:center}
+.kr-auth-bottom button{border:0;border-radius:999px;padding:12px 18px;font:800 14px/1.2 system-ui,-apple-system,"Noto Sans Thai","Segoe UI",sans-serif;box-shadow:0 5px 18px #0003;cursor:pointer}
+.kr-auth-login{background:#17212b;color:#fff}
+.kr-auth-logout{background:#fff;color:#17212b;border:1px solid #d8dde2!important}
+.kr-auth-bottom button:hover{transform:translateY(-1px)}
+@media(max-width:1100px){.container{width:calc(100% - 36px)}.contact{font-size:15px}.nav{gap:15px;font-size:14px}.card img{height:145px}.section{padding:60px 0}}
+@media(max-width:900px){.topbar{height:68px}.logo{font-size:21px}.logo-mark{width:38px;height:38px}.hero{min-height:560px}.hero-content{padding:72px 0}.hero p{font-size:18px}.card img{height:130px}.heading h2{font-size:32px}}
+@media(max-width:560px){.container{width:calc(100% - 22px)}.topbar{height:62px}.logo{font-size:18px}.logo-mark{width:32px;height:32px;font-size:18px}.hero{min-height:520px}.hero-content{padding:56px 0}h1{font-size:clamp(36px,10vw,48px);letter-spacing:-.6px}.hero p{font-size:15px}.eyebrow{font-size:11px}.section{padding:42px 0}.heading{margin-bottom:22px}.heading h2{font-size:26px}.heading p{font-size:13px}.grid6{gap:9px}.grid5{gap:9px}.card img{height:110px}.card-body{padding:9px}.card-body b{font-size:12px}.card-body span{font-size:10px;padding:4px 8px}.panel{padding:15px}.panel h3{font-size:18px}.pill{font-size:12px;padding:8px 10px}.steps{gap:9px}.step{padding:14px}.step h3{font-size:14px}.step p{font-size:12px}.cta{padding:22px}.cta h2{font-size:25px}.cta p{font-size:14px}.kr-auth-bottom{left:8px;bottom:8px;gap:6px}.kr-auth-bottom button{font-size:12px;padding:10px 12px}.manage-fab{left:8px;bottom:58px;padding:9px 12px;font-size:12px}.floating{right:8px;bottom:8px;gap:5px}.floating .btn{padding:10px 13px;font-size:12px}}
 </style>
 
 <style>
@@ -100,6 +150,11 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 .kr-card-photo-item img{width:62px;height:52px;object-fit:cover;border-radius:5px}
 .kr-card-photo-item span{flex:1;font-size:12px;overflow-wrap:anywhere}
 @media(max-width:600px){.kr-card-editor .kr-form{grid-template-columns:1fr}.kr-card-editor .kr-wide{grid-column:auto}}
+
+/* Image proportion fix: show the whole source photo without cropping */
+.card img{height:auto!important;aspect-ratio:4/3;object-fit:contain!important;background:#f3f4f6;display:block}
+.kr-gallery img{height:auto!important;aspect-ratio:4/3;object-fit:contain!important;background:#f3f4f6}
+.kr-newcard img{height:auto!important;aspect-ratio:4/3;object-fit:contain!important;background:#f3f4f6}
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -188,6 +243,11 @@ footer{background:#111820;color:#fff;padding:36px 0}.footer-grid{display:grid;gr
 <div><b>ติดต่อ</b><p class="small">092-796-8777<br>092-872-8174<br>LINE: LINE Official</p></div>
 <div><b>เมนู</b><p class="small"><a href="#count">จำนวนรถ</a><br><a href="#structure">โครงสร้าง</a><br><a href="#material">วัสดุ</a><br><a href="#work">ผลงาน</a></p></div></div></footer>
 <div class="floating"><a class="btn green" href="https://lin.ee/Yz2WhXb">LINE</a><a class="btn red" href="tel:0927968777">โทร</a></div>
+
+<div class="kr-auth-bottom" aria-label="ระบบผู้ดูแลเว็บไซต์">
+ <button class="kr-auth-login" type="button" onclick="krOpenManage()">เข้าสู่ระบบ</button>
+ <button class="kr-auth-logout" type="button" onclick="krAdminLogout()">ออกจากระบบ</button>
+</div>
 
 <button class="manage-fab" type="button" onclick="krOpenManage()">＋ เพิ่มรูป / จัดการหัวข้อ</button>
 
